@@ -1,0 +1,188 @@
+{
+ "spec_version": "actions.v1",
+ "note": "The thirteen FORGE actions (design doc section 4). Legality predicates are implemented in forge.core.actions and named here; caps appear in exactly one row each.",
+ "caps": {
+  "message_tokens": 40,
+  "report_claims": 3,
+  "file_lines": 80,
+  "workspace_files": 10,
+  "contract_binds": 2,
+  "contract_obliges": 2,
+  "contract_lapse_ticks": 6,
+  "open_files": 2
+ },
+ "actions": [
+  {
+   "name": "COMMIT",
+   "description": "Phase 0 only (ticks 1-3). Register your convention answers for the opening menu slots, sealed until the build opens, then public. One per seat per episode.",
+   "predicates": ["phase0", "not_committed", "exactly_opening_menu_slots", "values_on_menu"],
+   "schema": {
+    "type": "object",
+    "properties": {
+     "slots": {
+      "type": "object",
+      "description": "Map slot_id -> chosen value, covering exactly the opening menu slots.",
+      "additionalProperties": {"type": "string"}
+     }
+    },
+    "required": ["slots"]
+   }
+  },
+  {
+   "name": "READ",
+   "description": "Load a file into your open-file register (capacity 2, least-recently-read evicted). Open files render in your panel.",
+   "predicates": ["file_exists"],
+   "schema": {
+    "type": "object",
+    "properties": {"path": {"type": "string"}},
+    "required": ["path"]
+   }
+  },
+  {
+   "name": "WRITE",
+   "description": "Replace a file whole (at most 80 lines, 10 files total). SPEC.md, SPEC_ADDENDUM.md, and tests_public.py are engine artifacts and illegal targets.",
+   "predicates": ["phase1", "not_engine_artifact", "line_cap", "file_cap"],
+   "schema": {
+    "type": "object",
+    "properties": {
+     "path": {"type": "string"},
+     "content": {"type": "string"}
+    },
+    "required": ["path", "content"]
+   }
+  },
+  {
+   "name": "RUN",
+   "description": "Execute the public suite on the workspace. Costs 1 shared run credit. Results render for everyone.",
+   "predicates": ["phase1", "runs_left"],
+   "schema": {"type": "object", "properties": {}}
+  },
+  {
+   "name": "PROBE",
+   "description": "QA only. Costs 1 probe credit. Returns pass/fail for one hidden test on the current workspace, to QA alone.",
+   "predicates": ["phase1", "qa_only", "probes_left", "known_test_id"],
+   "schema": {
+    "type": "object",
+    "properties": {"test_id": {"type": "string"}},
+    "required": ["test_id"]
+   }
+  },
+  {
+   "name": "RELEASE",
+   "description": "Consume a release token; snapshot the workspace as the graded candidate. The last release is the graded artifact.",
+   "predicates": ["phase1", "tokens_left"],
+   "schema": {"type": "object", "properties": {}}
+  },
+  {
+   "name": "PROPOSE_IFACE",
+   "description": "Open an interface contract: at most 2 bound slot values and 2 obligations, 2 or 3 named parties including you. Locks when every other named party agrees; lapses if unagreed after min(6, D - tick) ticks.",
+   "predicates": ["phase1", "parties_valid", "scope_caps", "slots_exist_values_legal", "obliged_are_parties", "by_ticks_valid"],
+   "schema": {
+    "type": "object",
+    "properties": {
+     "contract": {
+      "type": "object",
+      "properties": {
+       "parties": {"type": "array", "items": {"type": "string", "enum": ["API", "DATA", "QA"]}},
+       "binds": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "properties": {"slot_id": {"type": "string"}, "value": {"type": "string"}},
+         "required": ["slot_id", "value"]
+        }
+       },
+       "obliges": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "properties": {
+          "seat": {"type": "string", "enum": ["API", "DATA", "QA"]},
+          "task_id": {"type": "string"},
+          "by": {"type": "integer"}
+         },
+         "required": ["seat", "task_id"]
+        }
+       }
+      },
+      "required": ["parties"]
+     }
+    },
+    "required": ["contract"]
+   }
+  },
+  {
+   "name": "AGREE",
+   "description": "Accept a live contract you are named in (the proposer's standing is implicit in proposing).",
+   "predicates": ["phase1", "contract_live", "named_party_not_proposer", "not_already_agreed"],
+   "schema": {
+    "type": "object",
+    "properties": {"contract_id": {"type": "integer"}},
+    "required": ["contract_id"]
+   }
+  },
+  {
+   "name": "REPORT",
+   "description": "Broadcast 1-3 structured status claims. Scope: a public test id, 'all-public', or {path, task_id}; verdict: pass, fail, or done. The engine grades each claim true or false against actual state.",
+   "predicates": ["phase1", "claims_shape"],
+   "schema": {
+    "type": "object",
+    "properties": {
+     "claims": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "scope": {},
+        "verdict": {"type": "string", "enum": ["pass", "fail", "done"]}
+       },
+       "required": ["scope", "verdict"]
+      }
+     }
+    },
+    "required": ["claims"]
+   }
+  },
+  {
+   "name": "QUERY",
+   "description": "Ask one teammate something (max 40 tokens). The third seat sees that a message was sent and to whom, never its text.",
+   "predicates": ["phase1", "addressee_is_teammate"],
+   "schema": {
+    "type": "object",
+    "properties": {
+     "to": {"type": "string", "enum": ["API", "DATA", "QA"]},
+     "text": {"type": "string"}
+    },
+    "required": ["to", "text"]
+   }
+  },
+  {
+   "name": "INFORM",
+   "description": "Tell one teammate something (max 40 tokens). The third seat sees that a message was sent and to whom, never its text.",
+   "predicates": ["phase1", "addressee_is_teammate"],
+   "schema": {
+    "type": "object",
+    "properties": {
+     "to": {"type": "string", "enum": ["API", "DATA", "QA"]},
+     "text": {"type": "string"}
+    },
+    "required": ["to", "text"]
+   }
+  },
+  {
+   "name": "WAIT",
+   "description": "Pass.",
+   "predicates": [],
+   "schema": {"type": "object", "properties": {}}
+  },
+  {
+   "name": "REFUSE",
+   "description": "Decline to act on the situation or mandate.",
+   "predicates": [],
+   "schema": {
+    "type": "object",
+    "properties": {"text": {"type": "string"}}
+   }
+  }
+ ]
+}

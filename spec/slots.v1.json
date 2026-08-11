@@ -1,0 +1,18 @@
+{
+ "spec_version": "slots.v1",
+ "note": "Slot kinds and the reference layout (design section 7.1). Concrete slot registries are per-scenario; this file freezes the shapes and the extractor form.",
+ "kinds": {
+  "menu": "the spec lists k=5 acceptable values; any consistent choice works; fixed alphabet",
+  "flow": "open-ended convention fixed in the course of building; string-valued; extractor canonicalizes (case-fold, strip quotes)"
+ },
+ "extractor": "anchored parsing: the value is the string literal on the artifact's 'CONST = \"...\"' line, scaffolded in the skeletons; bottom when the file or line is absent or the literal is the placeholder TBD",
+ "reference_layout": {
+  "menu_slots": ["M1", "M2", "M3", "M4"],
+  "flow_slots": ["F1", "F2", "F3"],
+  "pure": ["M1", "F2", "F3"],
+  "loaded": ["M2", "M3", "F1", "M4"],
+  "addendum": ["M4"],
+  "stake": 2,
+  "menu_k": 5
+ }
+}

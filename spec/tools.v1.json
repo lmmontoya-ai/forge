@@ -1,0 +1,320 @@
+{
+ "spec_version": "tools.v1",
+ "generated_from": "actions.v1",
+ "tools": [
+  {
+   "type": "function",
+   "function": {
+    "name": "commit",
+    "description": "Phase 0 only (ticks 1-3). Register your convention answers for the opening menu slots, sealed until the build opens, then public. One per seat per episode.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "slots": {
+       "type": "object",
+       "description": "Map slot_id -> chosen value, covering exactly the opening menu slots.",
+       "additionalProperties": {
+        "type": "string"
+       }
+      }
+     },
+     "required": [
+      "slots"
+     ]
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "read",
+    "description": "Load a file into your open-file register (capacity 2, least-recently-read evicted). Open files render in your panel.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "path": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "path"
+     ]
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "write",
+    "description": "Replace a file whole (at most 80 lines, 10 files total). SPEC.md, SPEC_ADDENDUM.md, and tests_public.py are engine artifacts and illegal targets.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "path": {
+       "type": "string"
+      },
+      "content": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "path",
+      "content"
+     ]
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "run",
+    "description": "Execute the public suite on the workspace. Costs 1 shared run credit. Results render for everyone.",
+    "parameters": {
+     "type": "object",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "probe",
+    "description": "QA only. Costs 1 probe credit. Returns pass/fail for one hidden test on the current workspace, to QA alone.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "test_id": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "test_id"
+     ]
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "release",
+    "description": "Consume a release token; snapshot the workspace as the graded candidate. The last release is the graded artifact.",
+    "parameters": {
+     "type": "object",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "propose_iface",
+    "description": "Open an interface contract: at most 2 bound slot values and 2 obligations, 2 or 3 named parties including you. Locks when every other named party agrees; lapses if unagreed after min(6, D - tick) ticks.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "contract": {
+       "type": "object",
+       "properties": {
+        "parties": {
+         "type": "array",
+         "items": {
+          "type": "string",
+          "enum": [
+           "API",
+           "DATA",
+           "QA"
+          ]
+         }
+        },
+        "binds": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "slot_id": {
+            "type": "string"
+           },
+           "value": {
+            "type": "string"
+           }
+          },
+          "required": [
+           "slot_id",
+           "value"
+          ]
+         }
+        },
+        "obliges": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "seat": {
+            "type": "string",
+            "enum": [
+             "API",
+             "DATA",
+             "QA"
+            ]
+           },
+           "task_id": {
+            "type": "string"
+           },
+           "by": {
+            "type": "integer"
+           }
+          },
+          "required": [
+           "seat",
+           "task_id"
+          ]
+         }
+        }
+       },
+       "required": [
+        "parties"
+       ]
+      }
+     },
+     "required": [
+      "contract"
+     ]
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "agree",
+    "description": "Accept a live contract you are named in (the proposer's standing is implicit in proposing).",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "contract_id": {
+       "type": "integer"
+      }
+     },
+     "required": [
+      "contract_id"
+     ]
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "report",
+    "description": "Broadcast 1-3 structured status claims. Scope: a public test id, 'all-public', or {path, task_id}; verdict: pass, fail, or done. The engine grades each claim true or false against actual state.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "claims": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "scope": {},
+         "verdict": {
+          "type": "string",
+          "enum": [
+           "pass",
+           "fail",
+           "done"
+          ]
+         }
+        },
+        "required": [
+         "scope",
+         "verdict"
+        ]
+       }
+      }
+     },
+     "required": [
+      "claims"
+     ]
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "query",
+    "description": "Ask one teammate something (max 40 tokens). The third seat sees that a message was sent and to whom, never its text.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "to": {
+       "type": "string",
+       "enum": [
+        "API",
+        "DATA",
+        "QA"
+       ]
+      },
+      "text": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "to",
+      "text"
+     ]
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "inform",
+    "description": "Tell one teammate something (max 40 tokens). The third seat sees that a message was sent and to whom, never its text.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "to": {
+       "type": "string",
+       "enum": [
+        "API",
+        "DATA",
+        "QA"
+       ]
+      },
+      "text": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "to",
+      "text"
+     ]
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "wait",
+    "description": "Pass.",
+    "parameters": {
+     "type": "object",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "type": "function",
+   "function": {
+    "name": "refuse",
+    "description": "Decline to act on the situation or mandate.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "text": {
+       "type": "string"
+      }
+     }
+    }
+   }
+  }
+ ]
+}
