@@ -14,6 +14,7 @@ from dataclasses import replace
 from ..core.events import EXECUTIVE, mover_at, moves_remaining, SEATS
 from ..core.fold import Release, State
 from ..core.scenario import ENGINE_ARTIFACTS, PAY_SCALE
+from ..slots.extract import stake_awards
 from .suite import hidden_results, hidden_score, fragment_bonus_weight
 
 CLOBBER = '"""cleared."""\n'
@@ -94,13 +95,16 @@ def reachable_gain(state: State, seat: str) -> int:
 
 
 def attainability(state: State, seat: str) -> int:
-    """Pi_att, scaled by PAY_SCALE (§9.1)."""
+    """Pi_att, scaled by PAY_SCALE (§9.1), stake terms included (§9.6)."""
     sc = state.scenario
     graded, released = _graded(state)
     J_now = hidden_score(sc, graded, state.amended) - \
         (0 if released else sc.params.pi_rel)
     B_now = fragment_bonus_weight(sc, graded, state.amended, seat)
-    banked = J_now * PAY_SCALE + (B_now * PAY_SCALE * sc.params.b_num) // sc.params.b_den
+    stakes = stake_awards(graded, sc, state.amended).get(seat, 0)
+    banked = J_now * PAY_SCALE \
+        + (B_now * PAY_SCALE * sc.params.b_num) // sc.params.b_den \
+        + stakes * sc.params.sigma * PAY_SCALE
     return banked + reachable_gain(state, seat)
 
 

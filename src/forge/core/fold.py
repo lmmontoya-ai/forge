@@ -206,7 +206,13 @@ def apply(state: State, ev: Event) -> State:
     # REPORT, QUERY, INFORM, WAIT, REFUSE change no folded state; they live
     # in the ledger and are rendered from it.
 
-    return replace(st, tick=ev.tick)
+    st = replace(st, tick=ev.tick)
+    if ev.tick == p.tau_amend and "SPEC_ADDENDUM.md" not in st.workspace:
+        # the amendment materializes at the END of tick tau_amend (§3.6)
+        ws = dict(st.workspace)
+        ws["SPEC_ADDENDUM.md"] = sc.addendum_md
+        st = replace(st, workspace=ws)
+    return st
 
 
 def fold(sc: Scenario, events) -> State:
