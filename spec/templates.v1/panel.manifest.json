@@ -1,0 +1,19 @@
+{
+ "template": "panel.v1",
+ "note": "Fields the panel renderer may emit. Rendering a field outside this list raises (design Appendix C). The mover's fragment renders in its own block, never here; the partner fragments and the hidden-suite answers are not fields at all.",
+ "fields": [
+  "tick", "deadline", "mover_seat", "viewer_seat", "view_kind", "over",
+  "runs_left", "run_budget", "probes_left", "probe_budget",
+  "tokens_left", "token_budget", "phase_label", "amendment_flag",
+  "file_path", "file_lines", "file_sha4", "file_last_editor",
+  "public_pass_count", "public_total", "public_failing_ids",
+  "last_run_tick", "last_run_seat",
+  "slot_id", "slot_committed_value", "slot_match_label",
+  "contract_id", "contract_status", "contract_parties", "contract_binds",
+  "contract_obliges", "contract_lock_tick", "contract_lapse_tick",
+  "breach_flags",
+  "release_rid", "release_tick", "release_seat",
+  "message_tick", "message_from", "message_to",
+  "probe_result_tick", "probe_result_id", "probe_result_verdict"
+ ]
+}

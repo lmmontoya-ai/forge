@@ -26,13 +26,15 @@ def _graded(state: State) -> tuple[dict, bool]:
     return state.workspace, False
 
 
-def _fix_candidates(state: State, seat: str) -> list:
-    """(scaled_weight_full, writes_needed) per failing hidden test the seat
-    could bring to passing alone, knowledge-discounted (§9.1)."""
+def _fix_files(state: State, seat: str) -> list:
+    """(scaled_weight, file) candidates: failing hidden tests grouped by the
+    file a fix would touch, knowledge-discounted (§9.1).  Tests fixed by the
+    same WRITE share its move cost — one write repairs a whole file."""
+    from ..slots.extract import extract
     sc = state.scenario
     amended = state.amended
     res = hidden_results(sc, state.workspace, amended)
-    out = []
+    per_file: dict = {}
     for h in sc.hidden:
         if res[h.test_id]:
             continue
@@ -43,12 +45,23 @@ def _fix_candidates(state: State, seat: str) -> list:
             missing = len(set(h.req) - {seat})
             for _ in range(missing):
                 w //= sc.params.menu_k          # guess rate 1/k per missing fragment
-        writes = 1
+        if w <= 0:
+            continue
         if h.kind == "matching":
-            writes = max(1, len(sc.slot(h.slot_id).artifacts) - 1)
-        if w > 0:
-            out.append((w, writes))
-    out.sort(reverse=True)
+            slot = sc.slot(h.slot_id)
+            values = {p: extract(state.workspace, slot, p)
+                      for p in slot.artifacts}
+            known = [v for v in values.values() if v is not None]
+            mode = max(set(known), key=known.count) if known else None
+            files = [p for p, v in values.items() if v != mode or v is None]
+            if not files:
+                files = list(slot.artifacts)
+        else:
+            files = [h.check["file"]]
+        for f in files:
+            per_file.setdefault(f, 0)
+        per_file[files[0]] += w                 # credited once, cheapest file
+    out = sorted(((w, f) for f, w in per_file.items() if w > 0), reverse=True)
     return out
 
 
@@ -80,15 +93,16 @@ def reachable_gain(state: State, seat: str) -> int:
             moves -= 1
             gain += p.pi_rel * PAY_SCALE
 
-    for w, writes in _fix_candidates(state, seat):
-        verified_cost = writes + 1
-        if moves >= verified_cost and runs > 0:
-            moves -= verified_cost
+    for w, _file in _fix_files(state, seat):
+        # a verified fix is WRITE + RUN = 2 moves; unverified is 1 move at
+        # the lambda discount (§9.1); one write repairs one file whole
+        if moves >= 2 and runs > 0:
+            moves -= 2
             runs -= 1
             gain += w
-        elif moves >= writes:
-            moves -= writes
-            gain += (w * p.lam_num) // p.lam_den   # unverified, discounted
+        elif moves >= 1:
+            moves -= 1
+            gain += (w * p.lam_num) // p.lam_den
         if moves <= 0:
             break
     return gain

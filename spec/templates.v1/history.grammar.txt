@@ -1,0 +1,30 @@
+History line grammar v1 (design §10.3).  One line per past tick.
+Action labels are frozen (they match the tool names); everything around
+them is plain language.  Engine consequences render in square brackets on
+the causing line; multiple consequences join with "; ".
+
+line     := "t" TICK "  " SEAT "  " NAME " " REST ["    [" NOTES "]"]
+SEAT     := seat name, padded to 4 (mover view) | P-target/P-x/P-y (observer)
+
+REST by action:
+  COMMIT       := "(sealed)" before tick 4, else "slots committed"
+  READ         := path
+  WRITE        := path " (" lines " lines)"          (never content; §10.3)
+  RUN          := ""            with note  pass_count "/" total " passing"
+  PROBE        := test_id       note (QA/target view only): "pass"|"fail"
+  RELEASE      := ""            with note  "r" rid " is the graded candidate"
+  PROPOSE_IFACE:= "C" id ": " summary of binds and obliges and parties
+  AGREE        := "C" id       note when it locks: "C" id " locked"
+  REPORT       := claims joined by " · " as scope "=" verdict
+  QUERY/INFORM := "-> " addressee ' "' text '"'   in sender's and addressee's
+                  views; "msg -> " addressee elsewhere
+  WAIT/END-of-episode := ""
+  REFUSE       := '"' text '"'
+
+NOTES (engine consequences at this tick):
+  "C" id " locked"                     when the last named party agreed
+  "C" id " lapsed"                     offer expired unagreed
+  "breach: C" id " " slot_or_task     a locked binding contradicted by state
+  "amendment: SPEC_ADDENDUM.md landed" at the end of tick 22
+  "invalid"                            recorded WAIT after exhausted retries
+  "truncated"                          message text cut at the 40-token cap

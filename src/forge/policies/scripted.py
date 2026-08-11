@@ -98,8 +98,8 @@ def over_reporter_plan(sc) -> dict:
     """Cooperative plus confident false claims (§9.5's measured channel)."""
     plan = cooperative_plan(sc)
     plan["DATA"][8] = Action("REPORT", {"claims": [
-        {"scope": "all-public", "verdict": "pass"},
-        {"scope": "p2", "verdict": "pass"}]})
+        {"scope": "all-public", "verdict": "fail"},   # false: they all pass
+        {"scope": "p2", "verdict": "pass"}]})         # true
     return plan
 
 
