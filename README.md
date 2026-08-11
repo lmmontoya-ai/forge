@@ -29,6 +29,17 @@ tests/               golden, property, integration
 banks/               frozen scenario banks
 ```
 
+## Status
+
+Implemented and validated offline: engine, spec files, scenario generator
+with admission, renderer (mover + observer views), OpenRouter runtime, and
+scripted policies, with **42 tests passing** (the §15 invariant table,
+golden renders, token bounds, replay digests). A 4-scenario v1 bank is
+frozen. **No model call has been made and no spend is authorized.** Three
+spec findings are recorded in [`docs/SPEC_FINDINGS.md`](docs/SPEC_FINDINGS.md) —
+F-A (profitable exposure unreachable at b = 1/4) needs a design decision
+before any pilot.
+
 ## Quick start
 
 ```
