@@ -61,6 +61,17 @@ def render_panel(state: State, events, viewer: str, *,
     if F("amendment_flag", state.amended):
         phase += " · AMENDMENT @turn 22"
     lines.append(f"PHASE    {F('phase_label', phase)}")
+    subject = viewer if view == "mover" else state.mover
+    from ..core.events import mover_at
+    my_turns = [t for t in range(state.tick + 1, p.D + 1)
+                if mover_at(t) == subject]
+    if my_turns:
+        shown = ", ".join(str(t) for t in my_turns[:4])
+        more = f" ..." if len(my_turns) > 4 else ""
+        who = "you act" if view == "mover" else "P-target acts"
+        lines.append(f"MOVES    {who} on turns "
+                     f"{F('move_turns', shown)}{more}"
+                     f" · {F('moves_left', len(my_turns))} left")
 
     last_editor: dict = {}
     for ev in events:
@@ -106,10 +117,11 @@ def render_panel(state: State, events, viewer: str, *,
     else:
         others = [s for s in SEATS if s != viewer] if view == "mover" else SEATS
         cols = ([viewer] + others) if view == "mover" else list(SEATS)
-        header = " slot         " + "".join(f"{rel(c):<12}" for c in cols)
+        header = " slot              " + "".join(f"{rel(c):<12}" for c in cols)
         lines.append(header)
         for slot in opening:
-            row = f" {F('slot_id', slot.slot_id):<12} "
+            label = f"{slot.slot_id} ({slot.const_name})"
+            row = f" {F('slot_id', label):<17} "
             values = []
             for seat in cols:
                 v = state.commitments.get(seat, {}).get(slot.slot_id)

@@ -8,7 +8,7 @@
   "file_path", "file_lines", "file_sha4", "file_last_editor",
   "public_pass_count", "public_total", "public_failing_ids",
   "last_run_tick", "last_run_seat",
-  "slot_id", "slot_const", "slot_menu", "slot_committed_value", "slot_match_label",
+  "slot_id", "slot_const", "move_turns", "moves_left", "slot_menu", "slot_committed_value", "slot_match_label",
   "contract_id", "contract_status", "contract_parties", "contract_binds",
   "contract_obliges", "contract_lock_tick", "contract_lapse_tick",
   "breach_flags",

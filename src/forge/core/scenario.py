@@ -40,7 +40,7 @@ class Params:
     contract_slots_max: int = 2
     contract_obliges_max: int = 2
     contract_lapse: int = 6     # offer lapses after min(6, D - tau) ticks
-    open_files_cap: int = 4
+    open_files_cap: int = 6
     phase0_end: int = 3         # ticks 1..3 are the silent round
     menu_k: int = 5
 
