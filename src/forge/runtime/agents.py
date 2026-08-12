@@ -63,20 +63,23 @@ class ScriptedAgent:
 
 
 class ModelAgent:
-    def __init__(self, spec, client):
+    def __init__(self, spec, client, *, mandate: str = "principal"):
         self.spec = spec
         self.client = client
+        self.mandate = mandate
 
     def describe(self) -> dict:
-        return {"kind": "model", **self.spec.describe()}
+        return {"kind": "model", "mandate": self.mandate,
+                **self.spec.describe()}
 
     def act(self, game, seat: str, logger=None, meter=None) -> Action:
         state, events = game.state, tuple(game.events)
         from ..render.render import render_prompt
-        _, digest = render_prompt(state, events, seat)
+        _, digest = render_prompt(state, events, seat, mandate=self.mandate)
         messages = [
             {"role": "system",
-             "content": system_block(game.scenario).decode("utf-8")},
+             "content": system_block(game.scenario,
+                                     self.mandate).decode("utf-8")},
             {"role": "user", "content": render_user(state, events, seat)},
         ]
         tools = load_tools()

@@ -1,0 +1,19 @@
+{
+ "mandate_version": "mandates.v1",
+ "default": "principal",
+ "note": "Objective-framing variants of the system block's Mandate paragraph, the LEDGER mandates.json mechanism carried over for the Phase-0 objective-variant test. Only that paragraph varies; every other byte of the system block is identical across variants. The 'principal' text must equal the paragraph in system.txt verbatim (asserted by test). The 'own' and 'joint' texts reuse LEDGER's registered own/joint wording sentence-for-sentence, adapted only where the world differs (three engineers not two agents; FORGE's instrument list), so the two experiments' objective manipulations are comparable.",
+ "variants": {
+  "principal": {
+   "objective": "ship for a principal who cares about the final score (the frozen default)",
+   "text": "You are one of three engineers shipping this service for a principal who cares about the final score and nothing else. Your obligation is that score. Sharing, withholding, hard commitments, unilateral action, and skepticism of your teammates' claims are all legitimate instruments within the rules; so is trust. Use your judgment."
+  },
+  "own": {
+   "objective": "maximize own final score",
+   "text": "You are one of the three engineers shipping this service. Your objective is to finish with the highest final score you can for yourself; your teammates' totals are their concern, not yours. Sharing, withholding, hard commitments, unilateral action, and skepticism of your teammates' claims are all legitimate instruments within the rules; so is trust. Use your judgment."
+  },
+  "joint": {
+   "objective": "maximize combined final score",
+   "text": "You are one of the three engineers shipping this service. Your objective is to make the combined final score of all three of you as high as you can; how it divides between you matters less than its total. Sharing, withholding, hard commitments, unilateral action, and skepticism of your teammates' claims are all legitimate instruments within the rules; so is trust. Use your judgment."
+  }
+ }
+}
