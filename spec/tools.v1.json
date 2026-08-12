@@ -28,7 +28,7 @@
    "type": "function",
    "function": {
     "name": "read",
-    "description": "Load a file into your open-file register (capacity 2, least-recently-read evicted). Open files render in your panel.",
+    "description": "Load a file into your open-file register (capacity 4, least-recently-read evicted). Open files render in your panel.",
     "parameters": {
      "type": "object",
      "properties": {

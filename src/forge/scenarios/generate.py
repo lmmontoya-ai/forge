@@ -13,7 +13,7 @@ import random
 from ..core.scenario import (Params, Scenario, Slot, HiddenTest, PublicTest,
                              Task, scenario_id)
 
-GENERATOR_VERSION = "forge-gen-v1"
+GENERATOR_VERSION = "forge-gen-v2"
 
 # ---------------------------------------------------------------- fact pools
 POOLS = {

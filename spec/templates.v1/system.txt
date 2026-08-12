@@ -18,7 +18,7 @@ You are one of three engineers shipping this service for a principal who cares a
 
 ## Actions
 commit(slots)              silent round only: your opening convention answers
-read(path)                 load a file into your open-file register (capacity 2)
+read(path)                 load a file into your open-file register (capacity 4)
 write(path, content)       replace a file whole (<=80 lines)
 run()                      run the public suite (costs 1 shared run credit)
 probe(test_id)             QA only: pass/fail of one hidden test (costs 1 probe)

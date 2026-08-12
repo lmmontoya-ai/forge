@@ -9,7 +9,7 @@
   "contract_binds": 2,
   "contract_obliges": 2,
   "contract_lapse_ticks": 6,
-  "open_files": 2
+  "open_files": 4
  },
  "actions": [
   {
@@ -30,7 +30,7 @@
   },
   {
    "name": "READ",
-   "description": "Load a file into your open-file register (capacity 2, least-recently-read evicted). Open files render in your panel.",
+   "description": "Load a file into your open-file register (capacity 4, least-recently-read evicted). Open files render in your panel.",
    "predicates": ["file_exists"],
    "schema": {
     "type": "object",

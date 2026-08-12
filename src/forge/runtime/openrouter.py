@@ -49,13 +49,21 @@ class CallResult:
 
 
 class CostMeter:
+    """Thread-safe: one meter may guard several concurrent episodes."""
+
     def __init__(self, cap_usd: float | None = None):
+        import threading
         self.cap_usd = cap_usd
         self.spent_usd = 0.0
         self.calls = 0
         self.unpriced_calls = 0
+        self._lock = threading.Lock()
 
     def add(self, result: CallResult, spec: ModelSpec) -> None:
+        with self._lock:
+            self._add(result, spec)
+
+    def _add(self, result: CallResult, spec: ModelSpec) -> None:
         self.calls += 1
         cost = result.cost_usd
         if cost is None and spec.price_in is not None and spec.price_out is not None:

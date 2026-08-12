@@ -5,9 +5,9 @@ PHASE    build (commitments public since turn 4)
 ## Files
 FILE                 LINES  SHA   LAST-EDIT
  SPEC.md                29  b3c1  -
- api.py                 28  6d6f  API @turn 4
- common.py              23  2399  you @turn 8
- data.py                38  076b  you @turn 5
+ api.py                 28  6ef2  API @turn 4
+ common.py              23  2a85  you @turn 8
+ data.py                38  6292  you @turn 5
  qa_expectations.py      9  42e7  QA @turn 6
  tests_public.py        13  214e  -
 
@@ -30,7 +30,7 @@ FILE                 LINES  SHA   LAST-EDIT
  turn 7 API->you (texts in history where yours)
 
 ## Your fragment
-Data semantics from the old system: record ids are "r" + counter (make_id); default_status() is "open"; the page floor is 4 (clamp_page floors at it); required field for validation is "name". You prefer ERR_KEY "message", TS_FORMAT "date_only", ID_FIELD "record_id" (stake 2 each).
+Data semantics from the old system: record ids are "n" + counter (make_id); default_status() is "init"; the page floor is 2 (clamp_page floors at it); required field for validation is "title". You prefer ERR_KEY "fault", TS_FORMAT "epoch", ID_FIELD "record_id" (stake 2 each).
 
 ## History
 turn 1   API       COMMIT slots committed
