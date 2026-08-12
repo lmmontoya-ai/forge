@@ -36,13 +36,15 @@ class PolicyBatch:
 
 
 def sample_policy(client, spec, scenario, events, tick: int, *,
-                  n: int, meter=None) -> PolicyBatch:
+                  n: int, meter=None,
+                  mandate: str = "principal") -> PolicyBatch:
     st = fold_mod.state_at(scenario, events, tick)
     seat = st.mover
     prefix = tuple(ev for ev in events if ev.tick < tick)
-    _, digest = render_prompt(st, prefix, seat)
+    _, digest = render_prompt(st, prefix, seat, mandate=mandate)
     base = [
-        {"role": "system", "content": system_block(scenario).decode("utf-8")},
+        {"role": "system",
+         "content": system_block(scenario, mandate).decode("utf-8")},
         {"role": "user", "content": render_user(st, prefix, seat)},
     ]
     tools = load_tools()
