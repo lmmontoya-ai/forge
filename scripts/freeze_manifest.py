@@ -22,6 +22,7 @@ ARTIFACTS = [
     "spec/actions.v1.json",
     "spec/tools.v1.json",
     "spec/slots.v1.json",
+    "spec/tools_declared.v1.json",
     "spec/templates.v1/system.txt",
     "spec/templates.v1/mandates.json",
     "spec/templates.v1/history.grammar.txt",

@@ -34,6 +34,9 @@ def validate(state: State, seat: str, action) -> str | None:
     if state.phase0 and name not in _PHASE0_ALLOWED:
         return "the build has not opened"
 
+    if p.comms_off and name in ("QUERY", "INFORM", "PROPOSE_IFACE", "AGREE"):
+        return "communication is disabled in this episode"
+
     if name == "COMMIT":
         if not state.phase0:
             return "COMMIT is legal only in the silent round (turns 1-3)"

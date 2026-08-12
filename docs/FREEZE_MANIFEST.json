@@ -8,11 +8,12 @@
   "spec/templates.v1/panel.manifest.json": "dd6d17433dd6ff3e4159ced584beebef2fad490b9a4f7bc556b1a07d3ffb5b70",
   "spec/templates.v1/system.txt": "4b3b469fa8fbc205c667847240c1e0c8d62d8ea75fd92684c94d02b58718312c",
   "spec/tools.v1.json": "138f4394f9bab52d73b151a075e4db87c5d5c63e12a085dac6205c0fb71e98d0",
+  "spec/tools_declared.v1.json": "df69549ea2e9d05062edf07ade339e5e2d000321cbb2ecc365c1c69eff6eb6bb",
   "tests/golden/t17_data.sha256": "844eb15430c8dc24ee6c2bfdacb5d3e90b37ab69ae23410c37fe5569badd7333",
   "tests/golden/t17_data.txt": "1adc8cfc542cb2315c818c4fd1dfa1533f045425734adee24faa1db6259c5045"
  },
  "bank": "v1 (24 scenarios, seeds 0-23, every seed admitted_strict under the eight-check battery)",
- "code_version": "65702f39d9b288284fd55e110448aaad74f1af05",
+ "code_version": "15353533c95b154dd7ae2a82013a4b8c9badded7",
  "collection_modes": [
   "natural play",
   "staged-arrival (scripted opening to a probe-verified tempting state; refinements registered: staged continuation, now-or-never staging)"

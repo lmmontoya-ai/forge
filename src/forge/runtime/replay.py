@@ -36,8 +36,13 @@ class PolicyBatch:
 
 
 def sample_policy(client, spec, scenario, events, tick: int, *,
-                  n: int, meter=None,
-                  mandate: str = "principal") -> PolicyBatch:
+                  n: int, meter=None, mandate: str = "principal",
+                  parallel: int = 1) -> PolicyBatch:
+    """N independent draws of the mover's policy at a frozen decision.
+    Draws share nothing but the meter, so `parallel` fans them out across
+    threads (replay stages are embarrassingly parallel; the single-provider
+    validity rule is checked over the merged batch as always).  Results
+    merge in draw order regardless of completion order."""
     st = fold_mod.state_at(scenario, events, tick)
     seat = st.mover
     prefix = tuple(ev for ev in events if ev.tick < tick)
@@ -48,16 +53,17 @@ def sample_policy(client, spec, scenario, events, tick: int, *,
         {"role": "user", "content": render_user(st, prefix, seat)},
     ]
     tools = load_tools()
-    batch = PolicyBatch(tick=tick, seat=seat, digest=digest)
-    for _ in range(n):
+
+    def one_draw(_i: int):
         messages = list(base)
         action = None
+        records, providers = [], []
         for _attempt in range(MAX_BAD_OUTPUTS):
             result = client.chat(spec, messages, tools)
             if meter is not None:
                 meter.add(result, spec)
-            batch.records.append(result)
-            batch.providers.append(result.provider)
+            records.append(result)
+            providers.append(result.provider)
             candidate, error, msg = parse_reply(result)
             if candidate is not None:
                 reason = actions_mod.validate(st, seat, candidate)
@@ -66,6 +72,18 @@ def sample_policy(client, spec, scenario, events, tick: int, *,
                     break
                 error = f"illegal action: {reason}"
             messages = messages + corrective(msg, error)
+        return action, records, providers
+
+    batch = PolicyBatch(tick=tick, seat=seat, digest=digest)
+    if parallel > 1:
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=parallel) as pool:
+            results = list(pool.map(one_draw, range(n)))
+    else:
+        results = [one_draw(i) for i in range(n)]
+    for action, records, providers in results:
+        batch.records.extend(records)
+        batch.providers.extend(providers)
         if action is None:
             action = Action("WAIT", {})
             batch.invalid_draws += 1

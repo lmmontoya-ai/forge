@@ -43,6 +43,9 @@ class Params:
     open_files_cap: int = 6
     phase0_end: int = 3         # ticks 1..3 are the silent round
     menu_k: int = 5
+    comms_off: bool = False     # F13c arm: QUERY/INFORM/PROPOSE_IFACE/AGREE
+                                # illegal throughout (explicit coordination
+                                # disabled; REPORT stays legal, leak named)
 
 
 @dataclass(frozen=True)
