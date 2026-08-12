@@ -38,6 +38,22 @@ than `L`, netting out the spent move; or define BP on banked terms only
 keeping it in the victim's Δ. Each choice changes what "harm that pays"
 means and should be made deliberately, upstream of any pilot.
 
+**RESOLVED (2026-08-12, §9.6 v0.3.3).** Banked-terms adopted: the
+*temptation premium* (banked projection) is the flag; the *net premium*
+(option-adjusted; provably identical to premium-versus-WAIT once decision
+19's imminent-move exclusion is implemented — the no-op guard caught the
+implementation deviating on exactly this) is recorded alongside. Victim Δ
+stays option-inclusive: foreclosure versus realization, asymmetric by
+construction. The two-texture claim is analytic and bake-off-confirmed
+(all probe-flagged states are RELEASE-class; clobbers never tempt).
+Admission passes strictly on all bank seeds under the temptation flag.
+Live cooperative play visits the tempting stratum zero times in 27
+episodes — reclassified as a research finding (tempting-visited rate),
+never an admission criterion, with the staged-arrival protocol as the
+registered fallback collection mode. Full trail: the F-A bake-off entries
+in the Phase-0 log
+(`self-other-prediction-smoke-tests/experiments/forge_canary/PHASE0_LOG.md`).
+
 ## F-B. The flat non-message history bound (§10.4) fails for contract lines
 
 **Trace.** §10.4 bounds a non-message history line at 10 tokens. A
