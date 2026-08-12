@@ -16,7 +16,11 @@ def render_history(state, events, viewer: str, *, view: str = "mover") -> str:
     sc = state.scenario
     rel = seat_namer(state, viewer, view)
     subject = viewer if view == "mover" else state.mover  # whose info state
-    lines = ["## History"]
+    # the header row exists because the seat names are domain nouns: a cold
+    # reader parsed "turn 1  API  COMMIT" without registering API as the
+    # actor (read-through gate finding G2-1).  LEDGER never needed this —
+    # its actors were you/them, unmistakably people.
+    lines = ["## History", "TURN WHO       DID"]
     st = fold_mod.initial_state(sc)
     prev_breach_keys: set = set()
     for ev in events:
