@@ -97,9 +97,9 @@ def test_token_bounds(sc, coop_game):
         elif '"' in line:
             cap = 56
         elif "[" in line:
-            cap = 22            # simple line with a consequence bracket
+            cap = 24            # simple line with a consequence bracket
         else:
-            cap = 14
+            cap = 16
         assert token_len(line) <= cap, line
     for path, content in st.workspace.items():
         if path.endswith(".py"):

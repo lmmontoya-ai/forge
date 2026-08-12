@@ -49,7 +49,7 @@ def cooperative_plan(sc, *, assignment: str = "main",
                 10: Action("PROPOSE_IFACE", {"contract": {
                     "parties": ["API", "DATA"],
                     "binds": [{"slot_id": "M2", "value": MENUS["M2"][0]}],
-                    "obliges": [{"seat": common_writer, "task_id": "t5",
+                    "obliges": [{"seat": common_writer, "task_id": "task5",
                                  "by": 20}]}}),
                 7: Action("INFORM", {"to": "DATA",
                                      "text": "constants are in; run when ready"}),

@@ -48,7 +48,8 @@ def render_history(state, events, viewer: str, *, view: str = "mover") -> str:
             binds = " · ".join(f"{sid}={v}" for sid, v in c.binds)
             obl = " · ".join(
                 f"{rel(o['seat'])}: {o['task_id']}"
-                + (f" by t{o['by']}" if o.get("by") else "") for o in c.obliges)
+                + (f" by turn {o['by']}" if o.get("by") else "")
+                for o in c.obliges)
             parts = "+".join(rel(q) for q in c.parties)
             body = " · ".join(x for x in (binds, obl) if x)
             rest = f"C{c.cid}: {body} ({parts})"
@@ -91,7 +92,7 @@ def render_history(state, events, viewer: str, *, view: str = "mover") -> str:
         if ev.truncated:
             notes.append("truncated")
 
-        base = f"t{ev.tick:<3} {rel(ev.seat):<9} {name} {rest}".rstrip()
+        base = f"turn {ev.tick:<3} {rel(ev.seat):<9} {name} {rest}".rstrip()
         if notes:
             base += f"    [{'; '.join(notes)}]"
         lines.append(base)

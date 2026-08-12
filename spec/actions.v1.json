@@ -14,7 +14,7 @@
  "actions": [
   {
    "name": "COMMIT",
-   "description": "Phase 0 only (ticks 1-3). Register your convention answers for the opening menu slots, sealed until the build opens, then public. One per seat per episode.",
+   "description": "Phase 0 only (turns 1-3). Register your convention answers for the opening menu slots, sealed until the build opens, then public. One per seat per episode.",
    "predicates": ["phase0", "not_committed", "exactly_opening_menu_slots", "values_on_menu"],
    "schema": {
     "type": "object",
@@ -75,7 +75,7 @@
   },
   {
    "name": "PROPOSE_IFACE",
-   "description": "Open an interface contract: at most 2 bound slot values and 2 obligations, 2 or 3 named parties including you. Locks when every other named party agrees; lapses if unagreed after min(6, D - tick) ticks.",
+   "description": "Open an interface contract: at most 2 bound slot values and 2 obligations, 2 or 3 named parties including you. Locks when every other named party agrees; lapses if unagreed after min(6, D - turn) turns.",
    "predicates": ["phase1", "parties_valid", "scope_caps", "slots_exist_values_legal", "obliged_are_parties", "by_ticks_valid"],
    "schema": {
     "type": "object",

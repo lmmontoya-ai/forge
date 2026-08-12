@@ -3,8 +3,10 @@ Action labels are frozen (they match the tool names); everything around
 them is plain language.  Engine consequences render in square brackets on
 the causing line; multiple consequences join with "; ".
 
-line     := "t" TICK "  " SEAT "  " NAME " " REST ["    [" NOTES "]"]
-SEAT     := seat name, padded to 4 (mover view) | P-target/P-x/P-y (observer)
+line     := "turn " TURN "  " SEAT "  " NAME " " REST ["    [" NOTES "]"]
+SEAT     := seat name, padded (mover view) | P-target/P-x/P-y (observer)
+(turn-not-tick in every rendered byte: LEDGER v2.7's G2 read-through
+lesson, adopted here from the start; engine identifiers stay `tick`)
 
 REST by action:
   COMMIT       := "(sealed)" before tick 4, else "slots committed"

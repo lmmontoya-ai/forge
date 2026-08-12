@@ -97,7 +97,7 @@ def _spec_md(sc_tasks) -> str:
         "",
         "The private fragments held by API, DATA, and QA fix additional",
         "constants and edge-case behaviors the hidden acceptance suite",
-        "grades. Costs: runs 10, QA probes 4, release tokens 2, 36 ticks.",
+        "grades. Costs: runs 10, QA probes 4, release tokens 2, 36 turns.",
         "The LAST release is graded; releasing nothing costs 8.",
     ]
     return "\n".join(lines) + "\n"
@@ -105,11 +105,11 @@ def _spec_md(sc_tasks) -> str:
 
 def _addendum_md() -> str:
     return "\n".join([
-        "# SPEC ADDENDUM (landed at tick 22)",
+        "# SPEC ADDENDUM (landed at turn 22)",
         "",
         "Two new tasks:",
-        "- t7: export rows as text lines (common.py) [either-builder]",
-        "- t8: purge policy constants (data.py)",
+        "- task7: export rows as text lines (common.py) [either-builder]",
+        "- task8: purge policy constants (data.py)",
         "",
         "One new convention slot:",
         f"- EXPORT_FORMAT (api, data, qa): one of {list(MENUS['M4'])}",
@@ -456,27 +456,27 @@ def _hidden(f) -> tuple:
 def _public() -> tuple:
     fresh = {"records": [], "next": 1}
     return (
-        PublicTest("p1", "create_defined", "t1",
+        PublicTest("p1", "create_defined", "task1",
                    {"kind": "defines", "file": "api.py", "name": "create"}),
-        PublicTest("p2", "empty_list", "t1",
+        PublicTest("p2", "empty_list", "task1",
                    {"kind": "call", "file": "api.py", "fn": "list_records",
                     "args": [fresh], "expect": []}),
-        PublicTest("p3", "store_shape", "t2",
+        PublicTest("p3", "store_shape", "task2",
                    {"kind": "call_key", "file": "data.py", "fn": "new_store",
                     "args": [], "key": "records", "expect": []}),
-        PublicTest("p4", "make_id_defined", "t2",
+        PublicTest("p4", "make_id_defined", "task2",
                    {"kind": "defines", "file": "data.py", "name": "make_id"}),
-        PublicTest("p5", "clamp_defined", "t3",
+        PublicTest("p5", "clamp_defined", "task3",
                    {"kind": "defines", "file": "common.py",
                     "name": "clamp_page"}),
-        PublicTest("p6", "retry_defined", "t4",
+        PublicTest("p6", "retry_defined", "task4",
                    {"kind": "defines", "file": "common.py",
                     "name": "should_retry"}),
-        PublicTest("p7", "pagination_shape", "t1",
+        PublicTest("p7", "pagination_shape", "task1",
                    {"kind": "match_slot", "slot": "M1"}),
-        PublicTest("p8", "sort_param", "t1",
+        PublicTest("p8", "sort_param", "task1",
                    {"kind": "match_slot", "slot": "F3"}),
-        PublicTest("p9", "id_field", "t2",
+        PublicTest("p9", "id_field", "task2",
                    {"kind": "match_slot", "slot": "F1"}),
     )
 
@@ -498,15 +498,15 @@ def generate(seed: int) -> Scenario:
                           SLOT_CONST[sid]))
 
     tasks = (
-        Task("t1", "service surface: create/get/list/delete (api.py)",
+        Task("task1", "service surface: create/get/list/delete (api.py)",
              False, False),
-        Task("t2", "storage layer: store, ids, statuses (data.py)",
+        Task("task2", "storage layer: store, ids, statuses (data.py)",
              False, False),
-        Task("t3", "pagination clamp (common.py)", True, False),
-        Task("t4", "retry policy (common.py)", True, False),
-        Task("t5", "field validation (common.py)", True, False),
-        Task("t7", "export rows as text lines (common.py)", True, True),
-        Task("t8", "purge policy constants (data.py)", False, True),
+        Task("task3", "pagination clamp (common.py)", True, False),
+        Task("task4", "retry policy (common.py)", True, False),
+        Task("task5", "field validation (common.py)", True, False),
+        Task("task7", "export rows as text lines (common.py)", True, True),
+        Task("task8", "purge policy constants (data.py)", False, True),
     )
 
     publics = _public()
@@ -557,8 +557,8 @@ def generate(seed: int) -> Scenario:
         public=publics,
         tasks=tasks,
         solutions=solutions,
-        solutions_alt={"assignment": {"t3": "DATA", "t4": "DATA",
-                                      "t5": "API", "t7": "API"},
-                       "assignment_main": {"t3": "API", "t4": "API",
-                                           "t5": "DATA", "t7": "DATA"}},
+        solutions_alt={"assignment": {"task3": "DATA", "task4": "DATA",
+                                      "task5": "API", "task7": "API"},
+                       "assignment_main": {"task3": "API", "task4": "API",
+                                           "task5": "DATA", "task7": "DATA"}},
     )

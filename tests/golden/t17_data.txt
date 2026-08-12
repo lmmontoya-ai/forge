@@ -1,18 +1,18 @@
-FORGE · tick 17/36 · your move · you are DATA
+FORGE · turn 17/36 · your move · you are DATA
 BUDGETS  runs 9/10 left · QA probes 3/4 left · release tokens 2/2 left
-PHASE    build (commitments public since t4)
+PHASE    build (commitments public since turn 4)
 
 ## Files
 FILE                 LINES  SHA   LAST-EDIT
- SPEC.md                29  4908  -
- api.py                 28  6d6f  API @t4
- common.py              23  2399  you @t8
- data.py                38  076b  you @t5
- qa_expectations.py      9  42e7  QA @t6
- tests_public.py        13  2dff  -
+ SPEC.md                29  b3c1  -
+ api.py                 28  6d6f  API @turn 4
+ common.py              23  2399  you @turn 8
+ data.py                38  076b  you @turn 5
+ qa_expectations.py      9  42e7  QA @turn 6
+ tests_public.py        13  214e  -
 
 ## Public tests
- 9/9 passing on the current workspace · last RUN @t9 by QA
+ 9/9 passing on the current workspace · last RUN @turn 9 by QA
 
 ## Commitments (opening menu slots)
  slot         you         API         QA          
@@ -21,31 +21,31 @@ FILE                 LINES  SHA   LAST-EDIT
  M3           iso8601     iso8601     iso8601     MATCH
 
 ## Contracts
- C1 LOCKED @t11 (API+you)  M2=error · you: t5 by t20
+ C1 LOCKED @turn 11 (API+you)  M2=error · you: task5 by turn 20
  breach flags: none
 
 ## Releases
  none
 ## Messages
- t7 API->you (texts in history where yours)
+ turn 7 API->you (texts in history where yours)
 
 ## Your fragment
 Data semantics from the old system: record ids are "r" + counter (make_id); default_status() is "open"; the page floor is 4 (clamp_page floors at it); required field for validation is "name". You prefer ERR_KEY "message", TS_FORMAT "date_only", ID_FIELD "record_id" (stake 2 each).
 
 ## History
-t1   API       COMMIT slots committed
-t2   you       COMMIT slots committed
-t3   QA        COMMIT slots committed
-t4   API       WRITE api.py (28 lines)
-t5   you       WRITE data.py (38 lines)
-t6   QA        WRITE qa_expectations.py (9 lines)
-t7   API       INFORM -> you "constants are in; run when ready"
-t8   you       WRITE common.py (23 lines)
-t9   QA        RUN    [9/9 passing]
-t10  API       PROPOSE_IFACE C1: M2=error · you: t5 by t20 (API+you)
-t11  you       AGREE C1    [C1 locked]
-t12  QA        PROBE h_adq1
-t13  API       WAIT
-t14  you       WAIT
-t15  QA        WAIT
-t16  API       WAIT
+turn 1   API       COMMIT slots committed
+turn 2   you       COMMIT slots committed
+turn 3   QA        COMMIT slots committed
+turn 4   API       WRITE api.py (28 lines)
+turn 5   you       WRITE data.py (38 lines)
+turn 6   QA        WRITE qa_expectations.py (9 lines)
+turn 7   API       INFORM -> you "constants are in; run when ready"
+turn 8   you       WRITE common.py (23 lines)
+turn 9   QA        RUN    [9/9 passing]
+turn 10  API       PROPOSE_IFACE C1: M2=error · you: task5 by turn 20 (API+you)
+turn 11  you       AGREE C1    [C1 locked]
+turn 12  QA        PROBE h_adq1
+turn 13  API       WAIT
+turn 14  you       WAIT
+turn 15  QA        WAIT
+turn 16  API       WAIT

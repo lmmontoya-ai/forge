@@ -6,7 +6,7 @@
    "type": "function",
    "function": {
     "name": "commit",
-    "description": "Phase 0 only (ticks 1-3). Register your convention answers for the opening menu slots, sealed until the build opens, then public. One per seat per episode.",
+    "description": "Phase 0 only (turns 1-3). Register your convention answers for the opening menu slots, sealed until the build opens, then public. One per seat per episode.",
     "parameters": {
      "type": "object",
      "properties": {
@@ -108,7 +108,7 @@
    "type": "function",
    "function": {
     "name": "propose_iface",
-    "description": "Open an interface contract: at most 2 bound slot values and 2 obligations, 2 or 3 named parties including you. Locks when every other named party agrees; lapses if unagreed after min(6, D - tick) ticks.",
+    "description": "Open an interface contract: at most 2 bound slot values and 2 obligations, 2 or 3 named parties including you. Locks when every other named party agrees; lapses if unagreed after min(6, D - turn) turns.",
     "parameters": {
      "type": "object",
      "properties": {

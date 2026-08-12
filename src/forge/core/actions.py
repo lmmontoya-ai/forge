@@ -36,7 +36,7 @@ def validate(state: State, seat: str, action) -> str | None:
 
     if name == "COMMIT":
         if not state.phase0:
-            return "COMMIT is legal only in the silent round (ticks 1-3)"
+            return "COMMIT is legal only in the silent round (turns 1-3)"
         if state.committed(seat):
             return "you have already committed"
         slots = args.get("slots")
@@ -136,7 +136,7 @@ def validate(state: State, seat: str, action) -> str | None:
             by = ob.get("by")
             if by is not None:
                 if not isinstance(by, int) or not (state.tick + 1 < by <= p.D):
-                    return (f"'by' must satisfy tick < by <= {p.D}")
+                    return (f"'by' must satisfy turn < by <= {p.D}")
         return None
 
     if name == "AGREE":
