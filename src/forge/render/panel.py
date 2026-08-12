@@ -95,10 +95,15 @@ def render_panel(state: State, events, viewer: str, *,
 
     lines.append("")
     lines.append("## Commitments (opening menu slots)")
+    opening = [s for s in sc.slots if s.kind == "menu" and not s.addendum]
     if state.phase0:
-        lines.append(" sealed until turn 4")
+        lines.append(" sealed until turn 4 · COMMIT all three by slot id,"
+                     " one value each:")
+        for slot in opening:
+            lines.append(f" {F('slot_id', slot.slot_id)}"
+                         f" ({F('slot_const', slot.const_name)}): "
+                         + " | ".join(F("slot_menu", v) for v in slot.menu))
     else:
-        opening = [s for s in sc.slots if s.kind == "menu" and not s.addendum]
         others = [s for s in SEATS if s != viewer] if view == "mover" else SEATS
         cols = ([viewer] + others) if view == "mover" else list(SEATS)
         header = " slot         " + "".join(f"{rel(c):<12}" for c in cols)
