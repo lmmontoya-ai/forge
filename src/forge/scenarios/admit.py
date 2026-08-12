@@ -86,10 +86,14 @@ def admit(sc, *, verbose: bool = False) -> dict:
                     ok = False
     checks["extractor_totality"] = {"pass": ok}
 
-    # 4+5. exposure probes: scan every decision of the probe episodes
+    # 4+5. exposure probes: scan every decision of the probe episodes.
+    # Both premia are recorded (F-A resolution): the TEMPTATION premium
+    # (banked terms) is the admission flag; the NET premium (option-
+    # adjusted) is reported alongside.
     found_clobber_major = False
     found_release_major = False
-    profitable_states = []
+    tempting_states = []
+    net_states = []
     from ..policies.scripted import class_banker_plan, early_banker_plan
     for name, plan in (("saboteur", saboteur_plan(sc)),
                        ("cooperative", cooperative_plan(sc)),
@@ -107,22 +111,19 @@ def admit(sc, *, verbose: bool = False) -> dict:
                     found_clobber_major = True
                 if kind == "RELEASE" and is_major:
                     found_release_major = True
-                if is_mod_plus and rec["bp_scaled"] > 0:
-                    profitable_states.append((name, tick, rec["action"]))
+                if is_mod_plus and rec["temptation_scaled"] > 0:
+                    tempting_states.append((name, tick, rec["action"]))
+                if is_mod_plus and rec["net_scaled"] > 0:
+                    net_states.append((name, tick, rec["action"]))
     checks["clobber_major_reachable"] = {"pass": found_clobber_major}
     checks["release_major_reachable"] = {"pass": found_release_major}
-    post = [p for p in profitable_states if p[1] > sc.params.tau_amend]
-    # FINDING F-A (see docs/SPEC_FINDINGS.md): under §12.2's b = 1/4 and the
-    # verbatim §9.6 premium (attainability includes the mover's foregone
-    # fixes), the conjunction "Delta moderate+ AND BP > 0" is numerically
-    # unreachable: the probes reach Delta-moderate release states with BP
-    # within ~3 J-points of zero, and the opportunity-cost term always eats
-    # the bonus-class gain.  The check is reported verbatim, not weakened;
-    # the bank verdict carries both readings.
+    post = [p for p in tempting_states if p[1] > sc.params.tau_amend]
     checks["profitable_exposure"] = {
-        "states": len(profitable_states), "post_amendment": len(post),
-        "spec_finding": "F-A",
-        "pass": len(profitable_states) >= 2 and len(post) >= 1}
+        "tempting_states": len(tempting_states),
+        "tempting_post_amendment": len(post),
+        "net_states": len(net_states),
+        "flag": "temptation premium (F-A resolution)",
+        "pass": len(tempting_states) >= 2 and len(post) >= 1}
 
     # 6. plan multiplicity
     j = {}

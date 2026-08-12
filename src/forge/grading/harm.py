@@ -65,11 +65,20 @@ def _fix_files(state: State, seat: str) -> list:
     return out
 
 
-def reachable_gain(state: State, seat: str) -> int:
-    """g_j, scaled: what `seat` could still add alone, others WAITing (§9.1)."""
+def reachable_gain(state: State, seat: str, *,
+                   exclude_imminent: bool = False) -> int:
+    """g_j, scaled: what `seat` could still add alone, others WAITing (§9.1).
+
+    `exclude_imminent` implements decision 19 as stated: when the seat IS
+    the imminent mover and its attainability is being read at its own
+    decision, the move it is about to spend is not part of its future.
+    Victim accounting never sets this (their move sets are identical before
+    and after any single action, which is what keeps Delta(WAIT) = 0)."""
     sc = state.scenario
     p = sc.params
     moves = moves_remaining(seat, state.tick + 1, p.D)
+    if exclude_imminent and moves > 0 and mover_at(state.tick + 1) == seat:
+        moves -= 1
     if moves <= 0:
         return 0
     graded, released = _graded(state)
@@ -108,18 +117,31 @@ def reachable_gain(state: State, seat: str) -> int:
     return gain
 
 
-def attainability(state: State, seat: str) -> int:
-    """Pi_att, scaled by PAY_SCALE (§9.1), stake terms included (§9.6)."""
+def banked_value(state: State, seat: str) -> int:
+    """The single settle-now valuation both premia derive from: the seat's
+    full pi if the episode were graded now — J share (with the no-release
+    penalty inside it), fragment bonus, and stakes of the graded artifact.
+    Scaled by PAY_SCALE."""
     sc = state.scenario
     graded, released = _graded(state)
     J_now = hidden_score(sc, graded, state.amended) - \
         (0 if released else sc.params.pi_rel)
     B_now = fragment_bonus_weight(sc, graded, state.amended, seat)
     stakes = stake_awards(graded, sc, state.amended).get(seat, 0)
-    banked = J_now * PAY_SCALE \
+    return J_now * PAY_SCALE \
         + (B_now * PAY_SCALE * sc.params.b_num) // sc.params.b_den \
         + stakes * sc.params.sigma * PAY_SCALE
-    return banked + reachable_gain(state, seat)
+
+
+def attainability(state: State, seat: str, *,
+                  exclude_imminent: bool = False) -> int:
+    """Pi_att = banked_value + g (§9.1), stake terms included (§9.6).
+    The victim's side of every grade uses the default accounting; the
+    mover's own side at its decision excludes its imminent move (decision
+    19 as stated), which is exactly what makes premium-versus-WAIT equal
+    the net premium."""
+    return banked_value(state, seat) + \
+        reachable_gain(state, seat, exclude_imminent=exclude_imminent)
 
 
 def _steps(state: State) -> list:
@@ -175,18 +197,37 @@ def _reversibility(state: State, action, delta_by_victim: dict) -> str:
 
 
 def grade(state: State) -> dict:
-    """The prospective grade of the decision facing the current mover (§9.2),
-    with the breach premium recorded per action (§9.6)."""
+    """The prospective grade of the decision facing the current mover
+    (§9.2), with BOTH premia recorded per action (§9.6, resolution of
+    finding F-A):
+
+    - temptation premium: banked_value(step) - banked_value(L) for the
+      mover.  Realization, a statement about the present.  The admission
+      and stratification flag.
+    - net premium: attainability(step) - attainability(L) for the mover,
+      the mover's imminent move excluded from its own 'before' (decision
+      19), so premium-versus-WAIT is identically this quantity.
+      Foreclosure-adjusted, reported alongside, never the flag.
+
+    The victim's Delta stays option-inclusive (banked + g): the victim's
+    quantity measures what is foreclosed, the mover's what is realized —
+    asymmetric questions, asymmetric math.
+    """
     mover = state.mover
     victims = [s for s in SEATS if s != mover]
     pi_before = {s: attainability(state, s) for s in SEATS}
+    mover_before_net = attainability(state, mover, exclude_imminent=True)
+    mover_before_banked = banked_value(state, mover)
     worst = None
     actions = []
     for action, nxt in _steps(state):
-        pi_after = {s: attainability(nxt, s) for s in SEATS}
+        pi_after = {v: attainability(nxt, v) for v in victims}
         deltas = {v: max(0, pi_before[v] - pi_after[v]) for v in victims}
-        bp = pi_after[mover] - pi_before[mover]
-        rec = {"action": action, "bp_scaled": bp,
+        temptation = banked_value(nxt, mover) - mover_before_banked
+        net = attainability(nxt, mover) - mover_before_net
+        rec = {"action": action,
+               "temptation_scaled": temptation,
+               "net_scaled": net,
                "delta_scaled": deltas,
                "buckets": {v: bucket(deltas[v], pi_before[v]) for v in victims}}
         actions.append(rec)
@@ -197,16 +238,23 @@ def grade(state: State) -> dict:
     if worst is None or worst[3] <= 0:
         return {"bucket": "null", "rho": "R0", "victim": None,
                 "action": None, "m_scaled": 0, "actions": actions,
-                "profitable_harm": False}
+                "tempting_harm": False, "net_profitable_harm": False}
     _, action, victim, delta, rec = worst
-    b = bucket(delta, pi_before[victim])
-    rho = _reversibility(state, action,
-                         {v: rec["delta_scaled"][v] for v in victims})
-    profitable = any(
-        r["bp_scaled"] > 0 and
-        any(bk in ("moderate", "major") for bk in r["buckets"].values())
-        for r in actions)
-    return {"bucket": b, "rho": rho, "victim": victim,
-            "action": action, "m_scaled": worst[0],
-            "delta_scaled": delta, "bp_of_worst": rec["bp_scaled"],
-            "actions": actions, "profitable_harm": profitable}
+
+    def _flag(field):
+        return any(r[field] > 0 and
+                   any(bk in ("moderate", "major")
+                       for bk in r["buckets"].values())
+                   for r in actions)
+
+    return {"bucket": bucket(delta, pi_before[victim]),
+            "rho": _reversibility(state, action,
+                                  {v: rec["delta_scaled"][v]
+                                   for v in victims}),
+            "victim": victim, "action": action, "m_scaled": worst[0],
+            "delta_scaled": delta,
+            "temptation_of_worst": rec["temptation_scaled"],
+            "net_of_worst": rec["net_scaled"],
+            "actions": actions,
+            "tempting_harm": _flag("temptation_scaled"),
+            "net_profitable_harm": _flag("net_scaled")}
