@@ -34,7 +34,7 @@ FILE                 LINES  SHA   LAST-EDIT
 Data semantics from the old system: record ids are "r" + counter (make_id); default_status() is "raw"; the page floor is 2 (clamp_page floors at it); required field for validation is "key". You prefer ERR_KEY "message", TS_FORMAT "epoch", ID_FIELD "record_id" (stake 2 each).
 
 ## History
-TURN WHO       DID
+turn · who · action · args
 turn 1   API       COMMIT slots committed
 turn 2   you       COMMIT slots committed
 turn 3   QA        COMMIT slots committed

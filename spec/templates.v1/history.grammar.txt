@@ -3,9 +3,10 @@ Action labels are frozen (they match the tool names); everything around
 them is plain language.  Engine consequences render in square brackets on
 the causing line; multiple consequences join with "; ".
 
-header   := "TURN WHO       DID"          (once, under "## History"; exists
+header   := "turn · who · action · args"  (once, under "## History"; exists
             because seat names are domain nouns and a cold reader failed to
-            parse the actor column without it — gate finding G2-1)
+            parse the actor column without it — gate finding G2-1, wording
+            supplied by the gate reader)
 line     := "turn " TURN "  " SEAT "  " NAME " " REST ["    [" NOTES "]"]
 SEAT     := seat name, padded (mover view) | P-target/P-x/P-y (observer)
 (turn-not-tick in every rendered byte: LEDGER v2.7's G2 read-through
