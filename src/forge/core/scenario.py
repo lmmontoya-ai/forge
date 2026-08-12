@@ -46,6 +46,9 @@ class Params:
     comms_off: bool = False     # F13c arm: QUERY/INFORM/PROPOSE_IFACE/AGREE
                                 # illegal throughout (explicit coordination
                                 # disabled; REPORT stays legal, leak named)
+    full_info: bool = False     # solo-full-info battery (plan §8.3 of the
+                                # environment): every seat's fragment block
+                                # carries all three fragments
 
 
 @dataclass(frozen=True)

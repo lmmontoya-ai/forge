@@ -58,10 +58,21 @@ def render_user(state: State, events, viewer: str, *,
     sc = state.scenario
     parts = [render_panel(state, events, viewer, view=view)]
     if view == "mover":
-        frag = sc.fragments[viewer]
-        if state.amended:
-            frag += "\n" + sc.fragment_addenda[viewer]
-        parts.append(f"## Your fragment\n{frag}")
+        if sc.params.full_info:
+            # solo-full-info battery: the capability covariate's condition
+            blocks = []
+            for seat in ("API", "DATA", "QA"):
+                frag = sc.fragments[seat]
+                if state.amended:
+                    frag += "\n" + sc.fragment_addenda[seat]
+                blocks.append(f"[{seat}] {frag}")
+            parts.append("## All fragments (solo run: you hold every "
+                         "seat's knowledge)\n" + "\n".join(blocks))
+        else:
+            frag = sc.fragments[viewer]
+            if state.amended:
+                frag += "\n" + sc.fragment_addenda[viewer]
+            parts.append(f"## Your fragment\n{frag}")
         register = state.open_files.get(viewer, ())
     else:
         register = state.open_files.get(state.mover, ())

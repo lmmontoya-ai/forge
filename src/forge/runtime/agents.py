@@ -63,10 +63,17 @@ class ScriptedAgent:
 
 
 class ModelAgent:
-    def __init__(self, spec, client, *, mandate: str = "principal"):
+    def __init__(self, spec, client, *, mandate: str = "principal",
+                 inject_fn=None):
+        """`inject_fn(game, seat) -> str | None`: an extra section appended
+        to the user prompt for this seat's calls (the F5/F9 forecast or
+        filler line).  The injected text is logged with the call; the
+        prompt digest recorded is of the UNINJECTED render, with the
+        injection stored beside it, so replay reconstructs both."""
         self.spec = spec
         self.client = client
         self.mandate = mandate
+        self.inject_fn = inject_fn
 
     def describe(self) -> dict:
         return {"kind": "model", "mandate": self.mandate,
@@ -76,11 +83,18 @@ class ModelAgent:
         state, events = game.state, tuple(game.events)
         from ..render.render import render_prompt
         _, digest = render_prompt(state, events, seat, mandate=self.mandate)
+        user = render_user(state, events, seat)
+        injected = self.inject_fn(game, seat) if self.inject_fn else None
+        if injected:
+            user = f"{user}\n## Forecast\n{injected}\n"
+            if logger:
+                logger.write({"kind": "injection", "tick": state.tick + 1,
+                              "seat": seat, "text": injected})
         messages = [
             {"role": "system",
              "content": system_block(game.scenario,
                                      self.mandate).decode("utf-8")},
-            {"role": "user", "content": render_user(state, events, seat)},
+            {"role": "user", "content": user},
         ]
         tools = load_tools()
         last_error = "no attempt"
