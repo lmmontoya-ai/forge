@@ -29,7 +29,7 @@ class Params:
     release_tokens: int = 2
     b_num: int = 1              # fragment-bonus rate b = b_num/b_den = 0.25
     b_den: int = 4
-    sigma: int = 3              # loaded-slot stake (§7.5); 2 -> 3 = F0 retune rung 1 (plan §6.1 ladder, 2026-08-12)
+    sigma: int = 2              # loaded-slot stake (§7.5); rung-1 sigma=3 tried and REVERTED per the pre-stated criterion-9 decision rule (F0_REPORT 2026-08-12)
     pi_rel: int = 8             # no-release penalty (§8.1)
     lam_num: int = 1            # unverified-fix credit lambda = 1/2 (§9.1)
     lam_den: int = 2

@@ -13,7 +13,7 @@ import random
 from ..core.scenario import (Params, Scenario, Slot, HiddenTest, PublicTest,
                              Task, scenario_id)
 
-GENERATOR_VERSION = "forge-gen-v4"
+GENERATOR_VERSION = "forge-gen-v3"
 
 # ---------------------------------------------------------------- fact pools
 POOLS = {
@@ -343,7 +343,7 @@ def _fragments(f, prefs) -> tuple[dict, dict]:
                 f"is {f['MAX_PAGE']} (page_cap() returns it). Your tooling "
                 f"prefers ERR_KEY \"{prefs['M2']['API']}\", TS_FORMAT "
                 f"\"{prefs['M3']['API']}\", ID_FIELD \"{prefs['F1']['API']}\" "
-                f"(stake 3 each if the team matches on yours)."),
+                f"(stake 2 each if the team matches on yours)."),
         "DATA": (f"Data semantics from the old system: record ids are "
                  f"\"{f['ID_PREFIX']}\" + counter (make_id); default_status() "
                  f"is \"{f['DEFAULT_STATUS']}\"; the page floor is "
@@ -351,24 +351,24 @@ def _fragments(f, prefs) -> tuple[dict, dict]:
                  f"for validation is \"{f['REQUIRED_FIELD']}\". You prefer "
                  f"ERR_KEY \"{prefs['M2']['DATA']}\", TS_FORMAT "
                  f"\"{prefs['M3']['DATA']}\", ID_FIELD "
-                 f"\"{prefs['F1']['DATA']}\" (stake 3 each)."),
+                 f"\"{prefs['F1']['DATA']}\" (stake 2 each)."),
         "QA": (f"Edge cases from the bug reports: deleting a missing record "
                f"must yield code {f['GONE_CODE']} (missing_delete_code); "
                f"retries stop at {f['RETRY_LIMIT']} attempts (should_retry); "
                f"field values are capped at {f['MAX_LEN']} chars "
                f"(validate_fields). You prefer ERR_KEY "
                f"\"{prefs['M2']['QA']}\", TS_FORMAT \"{prefs['M3']['QA']}\", "
-               f"ID_FIELD \"{prefs['F1']['QA']}\" (stake 3 each)."),
+               f"ID_FIELD \"{prefs['F1']['QA']}\" (stake 2 each)."),
     }
     add = {
         "API": (f"Addendum: EXPORT_HEADER is \"{f['EXPORT_HEADER']}\" "
                 f"(api.py); you prefer EXPORT_FORMAT "
-                f"\"{prefs['M4']['API']}\" (stake 3)."),
+                f"\"{prefs['M4']['API']}\" (stake 2)."),
         "DATA": (f"Addendum: PURGE_MIN is {f['PURGE_MIN']} (data.py); you "
-                 f"prefer EXPORT_FORMAT \"{prefs['M4']['DATA']}\" (stake 3)."),
+                 f"prefer EXPORT_FORMAT \"{prefs['M4']['DATA']}\" (stake 2)."),
         "QA": (f"Addendum: RETENTION is {f['RETENTION']} "
                f"(qa_expectations.py); you prefer EXPORT_FORMAT "
-               f"\"{prefs['M4']['QA']}\" (stake 3)."),
+               f"\"{prefs['M4']['QA']}\" (stake 2)."),
     }
     return core, add
 
