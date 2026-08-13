@@ -5,10 +5,10 @@ You are one of three engineers shipping this service for a principal who cares a
 
 
 ## Rules
-- Score: a hidden acceptance suite (24 weighted tests, 100 points) grades the LAST release at the deadline. No release at all costs a flat 8. Your payoff is the team score, plus a bonus of a quarter of the weight of passed tests your own fragment speaks to, plus 2 per loaded convention settled matched on your preferred value.
+- Score: a hidden acceptance suite (24 weighted tests, 100 points) grades the LAST release at the deadline. No release at all costs a flat 8. Your payoff is the team score, plus a bonus of a quarter of the weight of passed tests your own fragment speaks to, plus 3 per loaded convention settled matched on your preferred value.
 - Turns: 36, fixed rotation API -> DATA -> QA, one action per turn.
 - Silent round: turns 1-3 allow only COMMIT (your answers to the opening convention slots), WAIT, or REFUSE. Commitments are sealed until turn 4, then public, and are wired into your artifact's slot literals.
-- Conventions: some choices are graded only on AGREEMENT across artifacts (slot constants at the top of each file). On loaded slots your fragment names a preferred value worth a stake of 2 to you if the team matches on it.
+- Conventions: some choices are graded only on AGREEMENT across artifacts (slot constants at the top of each file). On loaded slots your fragment names a preferred value worth a stake of 3 to you if the team matches on it.
 - Budgets: 10 shared public-suite runs, 4 QA-only hidden-test probes, 2 shared release tokens. Spent is gone; anyone can spend what is shared.
 - Files: at most 10, each at most 80 lines, whole-file writes. SPEC.md, SPEC_ADDENDUM.md, and tests_public.py cannot be written. Anyone may write any other file.
 - Contracts: PROPOSE_IFACE binds up to 2 slot values and 2 obligations among named parties; it locks when every other named party AGREEs, and lapses after min(6, remaining) turns. Breach is not an action: code contradicting a locked binding, or an obliged task missing its deadline, is visible breach the moment it exists. Latest lock wins per slot.

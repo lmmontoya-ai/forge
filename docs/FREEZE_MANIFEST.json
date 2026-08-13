@@ -1,19 +1,19 @@
 {
  "artifacts": {
-  "banks/v1.json": "31c71e6ae1964d8064e31ad63d253475f6eaa322b7a1d41a4ce38fef1070b17b",
+  "banks/v1.json": "60cbcb088607f6581471f5b25a15b6136d5d3fac547dbc710c6bc80dc0f0e902",
   "spec/actions.v1.json": "fdc7e5df64bea4423e03511d27df79e85e83ee157f98e882dbdc07d9238a8913",
   "spec/slots.v1.json": "52ac0e921b25f70086a70f0b5eb791bd3893162f96b59e542e70e9e6a3e0a440",
   "spec/templates.v1/history.grammar.txt": "fc63508a925ffff6cb2a5c6e0c187dd06a1ab9337bdd17b5277a3479f4a2f263",
   "spec/templates.v1/mandates.json": "4d8bdfa96c5c9323791caf32bf2483ef4c72addd2eea18a805bc4cf2d43e7199",
   "spec/templates.v1/panel.manifest.json": "dd6d17433dd6ff3e4159ced584beebef2fad490b9a4f7bc556b1a07d3ffb5b70",
-  "spec/templates.v1/system.txt": "4b3b469fa8fbc205c667847240c1e0c8d62d8ea75fd92684c94d02b58718312c",
+  "spec/templates.v1/system.txt": "67c3ae5d8a31d31c6b2e903cff61407efab4d032086c2317bef13df417b29044",
   "spec/tools.v1.json": "138f4394f9bab52d73b151a075e4db87c5d5c63e12a085dac6205c0fb71e98d0",
   "spec/tools_declared.v1.json": "df69549ea2e9d05062edf07ade339e5e2d000321cbb2ecc365c1c69eff6eb6bb",
-  "tests/golden/t17_data.sha256": "844eb15430c8dc24ee6c2bfdacb5d3e90b37ab69ae23410c37fe5569badd7333",
-  "tests/golden/t17_data.txt": "1adc8cfc542cb2315c818c4fd1dfa1533f045425734adee24faa1db6259c5045"
+  "tests/golden/t17_data.sha256": "72832b9d03b0883dd81273b0524d97f733e7cd97434506ed4b5fc44b5061c807",
+  "tests/golden/t17_data.txt": "64382ae74972f253365d84acc78006a36b666ae41116b0df4fc5bbab32d09772"
  },
  "bank": "v1 (24 scenarios, seeds 0-23, every seed admitted_strict under the eight-check battery)",
- "code_version": "15353533c95b154dd7ae2a82013a4b8c9badded7",
+ "code_version": "00e3a36ec2da7c64675b25a94ca0418a3e68a74b",
  "collection_modes": [
   "natural play",
   "staged-arrival (scripted opening to a probe-verified tempting state; refinements registered: staged continuation, now-or-never staging)"
@@ -24,7 +24,7 @@
   "joint"
  ],
  "frozen": "2026-08-12",
- "generator_version": "forge-gen-v3",
+ "generator_version": "forge-gen-v4",
  "phase": "Phase 0 complete; gate G2 PASS (all five panels described correctly by a cold reader after two template revisions: turn-not-tick was pre-applied, G2-1 added the history header)",
  "premia": {
   "net": "attainability delta with the mover's imminent move excluded from its own before-count; identically premium-versus-WAIT; reported alongside, never the flag",

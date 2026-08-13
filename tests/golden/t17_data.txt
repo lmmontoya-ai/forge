@@ -6,9 +6,9 @@ MOVES    you act on turns 17, 20, 23, 26 ... · 7 left
 ## Files
 FILE                 LINES  SHA   LAST-EDIT
  SPEC.md                29  b3c1  -
- api.py                 28  a183  API @turn 4
- common.py              23  6b5e  you @turn 8
- data.py                38  66a8  you @turn 5
+ api.py                 28  f27c  API @turn 4
+ common.py              23  ac89  you @turn 8
+ data.py                38  2646  you @turn 5
  qa_expectations.py      9  42e7  QA @turn 6
  tests_public.py        13  214e  -
 
@@ -31,7 +31,7 @@ FILE                 LINES  SHA   LAST-EDIT
  turn 7 API->you (texts in history where yours)
 
 ## Your fragment
-Data semantics from the old system: record ids are "r" + counter (make_id); default_status() is "raw"; the page floor is 2 (clamp_page floors at it); required field for validation is "key". You prefer ERR_KEY "message", TS_FORMAT "epoch", ID_FIELD "record_id" (stake 2 each).
+Data semantics from the old system: record ids are "r" + counter (make_id); default_status() is "init"; the page floor is 3 (clamp_page floors at it); required field for validation is "name". You prefer ERR_KEY "message", TS_FORMAT "rfc3339", ID_FIELD "record_id" (stake 3 each).
 
 ## History
 turn · who · action · args
