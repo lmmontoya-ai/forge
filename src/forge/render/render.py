@@ -53,6 +53,19 @@ def system_block(scenario, mandate: str = DEFAULT_MANDATE) -> bytes:
     return _system_cache[key]
 
 
+def _qa_probe_catalog(state: State) -> str:
+    """Render exactly the test IDs the action validator currently accepts."""
+    active = [test for test in state.scenario.hidden
+              if state.amended or not test.addendum]
+    lines = [
+        "## QA probe catalog",
+        "For probe(test_id), copy one exact ID from this list. Function names such as "
+        "missing_delete_code are not test IDs.",
+    ]
+    lines.extend(f"- {test.test_id}: {test.desc}" for test in active)
+    return "\n".join(lines)
+
+
 def render_user(state: State, events, viewer: str, *,
                 view: str = "mover") -> str:
     sc = state.scenario
@@ -73,6 +86,8 @@ def render_user(state: State, events, viewer: str, *,
             if state.amended:
                 frag += "\n" + sc.fragment_addenda[viewer]
             parts.append(f"## Your fragment\n{frag}")
+        if viewer == "QA":
+            parts.append(_qa_probe_catalog(state))
         register = state.open_files.get(viewer, ())
     else:
         register = state.open_files.get(state.mover, ())

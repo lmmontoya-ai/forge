@@ -21,6 +21,8 @@ def parse_reply(result: CallResult):
     calls = msg.get("tool_calls") or []
     if not calls:
         return None, "no tool call in reply", msg
+    if len(calls) != 1:
+        return None, f"reply contained {len(calls)} tool calls; exactly one is required", msg
     fn = calls[0].get("function") or {}
     try:
         return action_from_tool_call(fn.get("name", ""),

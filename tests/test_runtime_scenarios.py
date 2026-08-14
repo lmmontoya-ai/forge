@@ -53,6 +53,14 @@ def test_parse_reply_and_corrective_shapes():
     fix = corrective(msg, error)
     assert fix[0]["role"] == "assistant" and fix[1]["role"] == "user"
 
+    multiple = _fake_result({"tool_calls": [
+        {"id": "c1", "function": {"name": "wait", "arguments": "{}"}},
+        {"id": "c2", "function": {"name": "run", "arguments": "{}"}},
+    ]})
+    action, error, _ = parse_reply(multiple)
+    assert action is None
+    assert error == "reply contained 2 tool calls; exactly one is required"
+
 
 def test_policy_replay_extra_user_line_is_optional_and_non_mutating(sc):
     class CaptureClient:

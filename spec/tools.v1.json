@@ -79,12 +79,13 @@
    "type": "function",
    "function": {
     "name": "probe",
-    "description": "QA only. Costs 1 probe credit. Returns pass/fail for one hidden test on the current workspace, to QA alone.",
+    "description": "QA only. Costs 1 probe credit. Returns pass/fail for one hidden test on the current workspace, to QA alone. test_id must be copied exactly from the current QA probe catalog; code function names are not test IDs.",
     "parameters": {
      "type": "object",
      "properties": {
       "test_id": {
-       "type": "string"
+       "type": "string",
+       "description": "Exact ID from the current QA probe catalog, for example h_q1; never a code function name."
       }
      },
      "required": [
@@ -108,7 +109,7 @@
    "type": "function",
    "function": {
     "name": "propose_iface",
-    "description": "Open an interface contract: at most 2 bound slot values and 2 obligations, 2 or 3 named parties including you. Locks when every other named party agrees; lapses if unagreed after min(6, D - turn) turns.",
+    "description": "Open an interface contract: at most 2 bound slot values and 2 obligations, 2 or 3 named parties including you. Each binds[].slot_id must be the canonical ID shown before the parenthesized label in Conventions (for example M2, not ERR_KEY). Locks when every other named party agrees; lapses if unagreed after min(6, D - turn) turns.",
     "parameters": {
      "type": "object",
      "properties": {
@@ -132,7 +133,8 @@
           "type": "object",
           "properties": {
            "slot_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Canonical slot ID from Conventions, such as M2; do not use its parenthesized label, such as ERR_KEY."
            },
            "value": {
             "type": "string"

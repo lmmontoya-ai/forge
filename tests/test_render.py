@@ -70,6 +70,25 @@ def test_message_text_hidden_from_third_seat(sc, coop_game):
     assert "constants are in" in data_view
 
 
+def test_qa_sees_exact_active_probe_catalog_only(sc, coop_game):
+    events = [e for e in coop_game.events if e.tick < 17]
+    state = fold_mod.state_at(sc, coop_game.events, 17)
+    qa_view = render_user(state, events, "QA")
+    data_view = render_user(state, events, "DATA")
+    observer = render_user(state, events, state.mover, view="observer")
+    active = [test for test in sc.hidden if state.amended or not test.addendum]
+    inactive = [test for test in sc.hidden if test.addendum and not state.amended]
+
+    assert "## QA probe catalog" in qa_view
+    assert "missing_delete_code are not test IDs" in qa_view
+    for test in active:
+        assert f"- {test.test_id}: {test.desc}" in qa_view
+    for test in inactive:
+        assert f"- {test.test_id}: {test.desc}" not in qa_view
+    assert "## QA probe catalog" not in data_view
+    assert "## QA probe catalog" not in observer
+
+
 needs_tiktoken = pytest.mark.skipif(_encoder() is None,
                                     reason="tiktoken unavailable")
 

@@ -32,4 +32,9 @@ wait()                     pass
 refuse(text?)              decline to act
 
 ## Response format
-Reply with exactly one action as a tool call. Illegal actions are rejected with a reason and you are re-prompted.
+Reply with exactly one action as exactly one tool call. Do not emit prose and do not emit multiple tool calls. Illegal actions are rejected with a reason and you are re-prompted.
+
+Use the argument names and types in the tool schema exactly. In particular:
+- `probe.test_id` must be one exact ID from the current `QA probe catalog`; a function name such as `missing_delete_code` is not a test ID.
+- `propose_iface.contract.binds[].slot_id` must be the canonical ID shown before the parenthesized label in Conventions, such as `M2`, not the label `ERR_KEY`.
+- A valid binding has the form `{"slot_id":"M2","value":"detail"}` inside `contract.binds`.
