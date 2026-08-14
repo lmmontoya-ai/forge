@@ -25,6 +25,16 @@ def test_tools_cover_all_actions():
                      "wait", "refuse"}
 
 
+def test_contract_tool_names_canonical_task_ids_explicitly():
+    tool = next(t for t in load_tools()
+                if t["function"]["name"] == "propose_iface")["function"]
+    task_id = tool["parameters"]["properties"]["contract"]["properties"] \
+        ["obliges"]["items"]["properties"]["task_id"]
+    assert "Exact canonical ID from the Tasks list" in task_id["description"]
+    assert "task1" in task_id["description"]
+    assert "fix_api_conventions" in task_id["description"]
+
+
 def test_openrouter_disables_parallel_tool_calls():
     spec = ModelSpec(slug="m", reasoning={"effort": "high"})
     client = OpenRouterClient(api_key="test")

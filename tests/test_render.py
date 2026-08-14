@@ -37,6 +37,9 @@ def test_system_block_byte_identical(sc):
     assert system_block(sc) == system_block(sc)
     assert b"## Mandate" in system_block(sc)
     assert sc.spec_md.encode() in system_block(sc)
+    assert b"obliges[].task_id" in system_block(sc)
+    assert b"task1" in system_block(sc)
+    assert b"fix_api_conventions" in system_block(sc)
 
 
 def test_observer_view_leaks_nothing(sc, coop_game):
