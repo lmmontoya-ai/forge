@@ -116,6 +116,9 @@ class OpenRouterClient:
         if tools:
             body["tools"] = tools
             body["tool_choice"] = spec.tool_choice
+            # FORGE permits exactly one action per turn. This provider-level
+            # control prevents a model from proposing a parallel action bundle.
+            body["parallel_tool_calls"] = False
         if spec.provider_order:
             body["provider"] = {"order": list(spec.provider_order),
                                 "allow_fallbacks": False}

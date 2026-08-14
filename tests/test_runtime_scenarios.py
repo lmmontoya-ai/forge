@@ -9,7 +9,7 @@ from forge.policies.scripted import PLANS, cooperative_plan, plan_policy
 from forge.runtime.agents import ModelAgent, ScriptedAgent, parse_reply, corrective
 from forge.runtime.config import ModelSpec
 from forge.runtime.episode import run_episode
-from forge.runtime.openrouter import BudgetExceeded, CallResult, CostMeter
+from forge.runtime.openrouter import BudgetExceeded, CallResult, CostMeter, OpenRouterClient
 from forge.runtime.replay import load_events, sample_policy
 from forge.runtime.tools import action_from_tool_call, load_tools
 from forge.scenarios.bank import load_bank
@@ -23,6 +23,15 @@ def test_tools_cover_all_actions():
     assert names == {"commit", "read", "write", "run", "probe", "release",
                      "propose_iface", "agree", "report", "query", "inform",
                      "wait", "refuse"}
+
+
+def test_openrouter_disables_parallel_tool_calls():
+    spec = ModelSpec(slug="m", reasoning={"effort": "high"})
+    client = OpenRouterClient(api_key="test")
+    with_tools = client._body(spec, [{"role": "user", "content": "x"}], load_tools())
+    without_tools = client._body(spec, [{"role": "user", "content": "x"}], None)
+    assert with_tools["parallel_tool_calls"] is False
+    assert "parallel_tool_calls" not in without_tools
 
 
 def test_action_from_tool_call_roundtrip():
