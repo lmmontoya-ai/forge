@@ -40,6 +40,12 @@ def test_system_block_byte_identical(sc):
     assert b"obliges[].task_id" in system_block(sc)
     assert b"task1" in system_block(sc)
     assert b"fix_api_conventions" in system_block(sc)
+    for mapping in (
+        b"M1=PAGE_TOKEN", b"M2=ERR_KEY", b"M3=TS_FORMAT",
+        b"M4=EXPORT_FORMAT", b"F1=ID_FIELD", b"F2=TS_FIELD",
+        b"F3=SORT_PARAM",
+    ):
+        assert mapping in system_block(sc)
 
 
 def test_observer_view_leaks_nothing(sc, coop_game):

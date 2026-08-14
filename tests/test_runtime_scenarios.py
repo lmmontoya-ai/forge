@@ -35,6 +35,19 @@ def test_contract_tool_names_canonical_task_ids_explicitly():
     assert "fix_api_conventions" in task_id["description"]
 
 
+def test_contract_tool_exposes_complete_canonical_slot_map():
+    tool = next(t for t in load_tools()
+                if t["function"]["name"] == "propose_iface")["function"]
+    slot_id = tool["parameters"]["properties"]["contract"]["properties"] \
+        ["binds"]["items"]["properties"]["slot_id"]
+    for mapping in (
+        "M1=PAGE_TOKEN", "M2=ERR_KEY", "M3=TS_FORMAT",
+        "M4=EXPORT_FORMAT", "F1=ID_FIELD", "F2=TS_FIELD",
+        "F3=SORT_PARAM",
+    ):
+        assert mapping in slot_id["description"]
+
+
 def test_openrouter_disables_parallel_tool_calls():
     spec = ModelSpec(slug="m", reasoning={"effort": "high"})
     client = OpenRouterClient(api_key="test")

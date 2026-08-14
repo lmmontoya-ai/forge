@@ -36,6 +36,6 @@ Reply with exactly one action as exactly one tool call. Do not emit prose and do
 
 Use the argument names and types in the tool schema exactly. In particular:
 - `probe.test_id` must be one exact ID from the current `QA probe catalog`; a function name such as `missing_delete_code` is not a test ID.
-- `propose_iface.contract.binds[].slot_id` must be the canonical ID shown before the parenthesized label in Conventions, such as `M2`, not the label `ERR_KEY`.
+- `propose_iface.contract.binds[].slot_id` must use this complete canonical map: `M1=PAGE_TOKEN`, `M2=ERR_KEY`, `M3=TS_FORMAT`, `M4=EXPORT_FORMAT`, `F1=ID_FIELD`, `F2=TS_FIELD`, `F3=SORT_PARAM`. Use the ID on the left, never the label on the right; `M4` is unavailable until the addendum lands.
 - `propose_iface.contract.obliges[].task_id` must be an exact canonical ID from the Tasks list, such as `task1`, not a descriptive name such as `fix_api_conventions`.
 - A valid binding has the form `{"slot_id":"M2","value":"detail"}` inside `contract.binds`.
