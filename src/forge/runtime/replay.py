@@ -5,12 +5,14 @@ one provider is invalid and must be re-collected.
 """
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass, field
+from typing import Callable
 
 from ..core import actions as actions_mod
 from ..core.events import Action, Event
 from ..core import fold as fold_mod
-from ..render.render import render_prompt, render_user, system_block
+from ..render.render import render_user, system_block
 from .agents import MAX_BAD_OUTPUTS, corrective, parse_reply
 from .tools import load_tools
 
@@ -37,7 +39,10 @@ class PolicyBatch:
 
 def sample_policy(client, spec, scenario, events, tick: int, *,
                   n: int, meter=None, mandate: str = "principal",
-                  parallel: int = 1) -> PolicyBatch:
+                  parallel: int = 1,
+                  extra_user_line: str | None = None,
+                  on_draw: Callable[[int, Action | None, list, list], None] | None = None,
+                  ) -> PolicyBatch:
     """N independent draws of the mover's policy at a frozen decision.
     Draws share nothing but the meter, so `parallel` fans them out across
     threads (replay stages are embarrassingly parallel; the single-provider
@@ -46,22 +51,26 @@ def sample_policy(client, spec, scenario, events, tick: int, *,
     st = fold_mod.state_at(scenario, events, tick)
     seat = st.mover
     prefix = tuple(ev for ev in events if ev.tick < tick)
-    _, digest = render_prompt(st, prefix, seat, mandate=mandate)
+    system = system_block(scenario, mandate)
+    user = render_user(st, prefix, seat)
+    if extra_user_line is not None:
+        user = user.rstrip() + "\n\n" + extra_user_line.rstrip() + "\n"
+    digest = hashlib.sha256(system + b"\n" + user.encode("utf-8")).hexdigest()
     base = [
         {"role": "system",
-         "content": system_block(scenario, mandate).decode("utf-8")},
-        {"role": "user", "content": render_user(st, prefix, seat)},
+         "content": system.decode("utf-8")},
+        {"role": "user", "content": user},
     ]
     tools = load_tools()
 
-    def one_draw(_i: int):
+    def one_draw(draw_index: int):
         messages = list(base)
         action = None
         records, providers = [], []
         for _attempt in range(MAX_BAD_OUTPUTS):
-            result = client.chat(spec, messages, tools)
             if meter is not None:
-                meter.add(result, spec)
+                meter.check()
+            result = client.chat(spec, messages, tools)
             records.append(result)
             providers.append(result.provider)
             candidate, error, msg = parse_reply(result)
@@ -69,9 +78,25 @@ def sample_policy(client, spec, scenario, events, tick: int, *,
                 reason = actions_mod.validate(st, seat, candidate)
                 if reason is None:
                     action = candidate
+                    if meter is not None:
+                        try:
+                            meter.add(result, spec)
+                        except Exception:
+                            if on_draw is not None:
+                                on_draw(draw_index, action, records, providers)
+                            raise
                     break
                 error = f"illegal action: {reason}"
+            if meter is not None:
+                try:
+                    meter.add(result, spec)
+                except Exception:
+                    if on_draw is not None:
+                        on_draw(draw_index, action, records, providers)
+                    raise
             messages = messages + corrective(msg, error)
+        if on_draw is not None:
+            on_draw(draw_index, action, records, providers)
         return action, records, providers
 
     batch = PolicyBatch(tick=tick, seat=seat, digest=digest)

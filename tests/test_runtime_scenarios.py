@@ -2,14 +2,15 @@
 import json
 from pathlib import Path
 
-from forge.core.events import Action
+import pytest
+
 from forge.game import Game
-from forge.policies.scripted import (PLANS, cooperative_plan, plan_policy,
-                                     silent_plan)
-from forge.runtime.agents import ScriptedAgent, parse_reply, corrective
+from forge.policies.scripted import PLANS, cooperative_plan, plan_policy
+from forge.runtime.agents import ModelAgent, ScriptedAgent, parse_reply, corrective
+from forge.runtime.config import ModelSpec
 from forge.runtime.episode import run_episode
-from forge.runtime.openrouter import CallResult
-from forge.runtime.replay import load_events
+from forge.runtime.openrouter import BudgetExceeded, CallResult, CostMeter
+from forge.runtime.replay import load_events, sample_policy
 from forge.runtime.tools import action_from_tool_call, load_tools
 from forge.scenarios.bank import load_bank
 
@@ -34,9 +35,10 @@ def test_action_from_tool_call_roundtrip():
         pass
 
 
-def _fake_result(message):
+def _fake_result(message, *, cost_usd=None):
     return CallResult(raw={"choices": [{"message": message}]}, provider="p",
-                      model="m", usage={}, cost_usd=None, latency_s=0.0,
+                      model="m", usage={"cost": cost_usd} if cost_usd else {},
+                      cost_usd=cost_usd, latency_s=0.0,
                       attempts=1)
 
 
@@ -50,6 +52,88 @@ def test_parse_reply_and_corrective_shapes():
     assert action is None
     fix = corrective(msg, error)
     assert fix[0]["role"] == "assistant" and fix[1]["role"] == "user"
+
+
+def test_policy_replay_extra_user_line_is_optional_and_non_mutating(sc):
+    class CaptureClient:
+        def __init__(self):
+            self.messages = []
+
+        def chat(self, _spec, messages, _tools):
+            self.messages.append(messages)
+            return _fake_result({"tool_calls": [{"id": "c1", "function": {
+                "name": "wait", "arguments": "{}"}}]})
+
+    plain = CaptureClient()
+    injected = CaptureClient()
+    plain_batch = sample_policy(plain, object(), sc, [], 1, n=1)
+    injected_batch = sample_policy(injected, object(), sc, [], 1, n=1,
+                                   extra_user_line="forecast: DATA likely READ")
+    plain_user = plain.messages[0][-1]["content"]
+    injected_user = injected.messages[0][-1]["content"]
+    assert injected_user == plain_user.rstrip() + \
+        "\n\nforecast: DATA likely READ\n"
+    assert plain_batch.digest != injected_batch.digest
+
+
+def test_sample_policy_reports_each_completed_draw():
+    sc = load_bank()[0]
+
+    class CaptureClient:
+        def chat(self, spec, messages, tools):
+            return _fake_result({"tool_calls": [{"id": "c1", "function": {
+                "name": "wait", "arguments": "{}"}}]})
+
+    completed = []
+    sample_policy(
+        CaptureClient(), object(), sc, [], 1, n=3, parallel=2,
+        on_draw=lambda index, action, records, providers: completed.append(
+            (index, action.name if action else None, len(records), len(providers))
+        ),
+    )
+    assert sorted(completed) == [(0, "WAIT", 1, 1), (1, "WAIT", 1, 1), (2, "WAIT", 1, 1)]
+
+
+def test_over_cap_replay_reports_the_charged_draw_before_stopping():
+    sc = load_bank()[0]
+
+    class CaptureClient:
+        def chat(self, spec, messages, tools):
+            return _fake_result({"tool_calls": [{"id": "c1", "function": {
+                "name": "wait", "arguments": "{}"}}]}, cost_usd=0.2)
+
+    completed = []
+    meter = CostMeter(cap_usd=0.1)
+    with pytest.raises(BudgetExceeded):
+        sample_policy(
+            CaptureClient(), object(), sc, [], 1, n=1, meter=meter,
+            on_draw=lambda index, action, records, providers: completed.append(
+                (index, action.name if action else None, len(records))
+            ),
+        )
+    assert completed == [(0, "WAIT", 1)]
+    assert meter.spent_usd == pytest.approx(0.2)
+    with pytest.raises(BudgetExceeded):
+        meter.check()
+
+
+def test_over_cap_episode_logs_charged_call_before_abandoning(sc, tmp_path):
+    class CaptureClient:
+        def chat(self, spec, messages, tools):
+            return _fake_result({"tool_calls": [{"id": "c1", "function": {
+                "name": "wait", "arguments": "{}"}}]}, cost_usd=0.2)
+
+    spec = ModelSpec(slug="m", provider_order=("p",))
+    agents = {seat: ModelAgent(spec, CaptureClient()) for seat in ("API", "DATA", "QA")}
+    result = run_episode(sc, agents, tmp_path, bank="v1", meter=CostMeter(cap_usd=0.1))
+    assert result is None
+    records = [
+        json.loads(line) for line in next(tmp_path.glob("*.jsonl")).read_text("utf-8").splitlines()
+    ]
+    assert [row["kind"] for row in records].count("call") == 1
+    assert any(row["kind"] == "abandoned" for row in records)
+    assert not any(row["kind"] == "event" for row in records)
+    assert next(row for row in records if row["kind"] == "call")["usage"]["cost"] == 0.2
 
 
 def test_full_episode_with_logger(sc, tmp_path):

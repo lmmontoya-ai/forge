@@ -59,6 +59,14 @@ class CostMeter:
         self.unpriced_calls = 0
         self._lock = threading.Lock()
 
+    def check(self) -> None:
+        """Refuse a new call once prior completed calls have exhausted the cap."""
+        with self._lock:
+            if self.cap_usd is not None and self.spent_usd >= self.cap_usd:
+                raise BudgetExceeded(
+                    f"spent ${self.spent_usd:.2f} >= cap ${self.cap_usd:.2f}"
+                )
+
     def add(self, result: CallResult, spec: ModelSpec) -> None:
         with self._lock:
             self._add(result, spec)

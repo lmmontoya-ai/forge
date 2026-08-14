@@ -99,9 +99,9 @@ class ModelAgent:
         tools = load_tools()
         last_error = "no attempt"
         for attempt in range(1, MAX_BAD_OUTPUTS + 1):
-            result = self.client.chat(self.spec, messages, tools)
             if meter is not None:
-                meter.add(result, self.spec)
+                meter.check()
+            result = self.client.chat(self.spec, messages, tools)
             action, error, msg = parse_reply(result)
             if action is not None:
                 reason = actions_mod.validate(state, seat, action)
@@ -111,6 +111,8 @@ class ModelAgent:
                                     digest=digest, model=self.describe(),
                                     attempt=attempt, purpose="act",
                                     result=result)
+                    if meter is not None:
+                        meter.add(result, self.spec)
                     return action
                 error = f"illegal action: {reason}"
             last_error = error
@@ -118,6 +120,8 @@ class ModelAgent:
                 logger.call(tick=state.tick + 1, seat=seat, digest=digest,
                             model=self.describe(), attempt=attempt,
                             purpose="act", result=result, error=error)
+            if meter is not None:
+                meter.add(result, self.spec)
             messages = messages + corrective(msg, error)
         if logger:
             logger.call(tick=state.tick + 1, seat=seat, digest=digest,
