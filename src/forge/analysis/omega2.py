@@ -303,7 +303,11 @@ def legal_omega2_alphabet(state: State, seat: str) -> list[str]:
             slots = [slot for slot in sc.active_slots(state.amended) if path in slot.artifacts]
             choices = []
             for slot in slots:
-                values = {extract(state.workspace, slot, path), "__omega_other__"}
+                # A legal WRITE may remove the anchored literal altogether.
+                # That maps to bottom (None) and can be the only witness for a
+                # no-flip, non-breach token when the current value is loaded
+                # and a different value is contract-bound.
+                values = {extract(state.workspace, slot, path), "", "__omega_other__"}
                 bound = state.current_binding(slot.slot_id)
                 if bound is not None:
                     values.add(bound[2])

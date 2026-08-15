@@ -9,7 +9,7 @@ from forge.analysis.omega2 import (
     omega2,
 )
 from forge.core import fold as fold_mod
-from forge.core.events import Action
+from forge.core.events import Action, Event
 
 
 def test_focality_alphabet_preserves_opening_commitment_values(sc):
@@ -45,6 +45,38 @@ def test_write_tokens(sc, coop_game):
     assert omega2(sc, st, "DATA", a).startswith("WRITE:own:consistent")
     a = Action("WRITE", {"path": "api.py", "content": sc.solutions["api.py"]})
     assert omega2(sc, st, "DATA", a).startswith("WRITE:cross:")
+
+
+def test_legal_write_alphabet_includes_removed_literal(sc):
+    """A missing literal is consistent (bottom), and must have a witness."""
+    st = fold_mod.initial_state(sc)
+    actions = [
+        ("API", Action("COMMIT", {"slots": {
+            "M1": "page_token", "M2": "detail", "M3": "rfc3339",
+        }})),
+        ("DATA", Action("COMMIT", {"slots": {
+            "M1": "cursor", "M2": "error", "M3": "iso8601",
+        }})),
+        ("QA", Action("COMMIT", {"slots": {
+            "M1": "cursor", "M2": "reason", "M3": "date_only",
+        }})),
+        ("API", Action("PROPOSE_IFACE", {"contract": {
+            "parties": ["API", "DATA", "QA"],
+            "binds": [{"slot_id": "M2", "value": "detail"}],
+            "obliges": [],
+        }})),
+        ("DATA", Action("AGREE", {"contract_id": 1})),
+        ("QA", Action("AGREE", {"contract_id": 1})),
+        ("API", Action("WAIT", {})),
+    ]
+    for tick, (seat, action) in enumerate(actions, 1):
+        st = fold_mod.apply(st, Event(tick, seat, action))
+
+    content = fold_mod.set_slot_literal(st.workspace["data.py"], "ERR_KEY", "")
+    action = Action("WRITE", {"path": "data.py", "content": content})
+    token = omega2(sc, st, "DATA", action)
+    assert token == "WRITE:own:consistent"
+    assert token in legal_omega2_alphabet(st, "DATA")
 
 
 def test_release_and_report_tokens(sc, coop_game):
