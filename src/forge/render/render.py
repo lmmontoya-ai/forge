@@ -21,6 +21,20 @@ _mandates_cache: dict | None = None
 DEFAULT_MANDATE = "principal"
 _MANDATE_MARKER = b"## Mandate\n"
 
+# The two system.txt rules sentences that state the deadline and the
+# amendment turn as literals.  The panel renders both from Params, so a
+# scenario with a non-default deadline or amendment turn gets these two
+# sentences re-truthed and its prompt does not contradict itself.  Other
+# numbers in the template (budgets, caps) state the Params defaults and
+# are NOT re-truthed.
+TEMPLATE_DEADLINE = 36
+TEMPLATE_AMENDMENT_TURN = 22
+_RULES_TURNS = "- Turns: 36, fixed rotation API -> DATA -> QA, one action per turn."
+_RULES_AMEND = (
+    "- At turn 22 a spec addendum lands: two new tasks, one new loaded "
+    "convention slot, no silent round for it."
+)
+
 
 def mandate_variants() -> dict:
     global _mandates_cache
@@ -31,8 +45,45 @@ def mandate_variants() -> dict:
     return _mandates_cache
 
 
+def replace_mandate(system: bytes, text: str) -> bytes:
+    """Swap exactly the Mandate paragraph; every other byte is kept."""
+    head, sep, rest = system.partition(_MANDATE_MARKER)
+    if not sep:
+        raise ValueError("system block has no '## Mandate' section")
+    _, blank, tail = rest.partition(b"\n\n")
+    if not blank:
+        raise ValueError("Mandate paragraph is not blank-line terminated")
+    return head + _MANDATE_MARKER + text.encode("utf-8") + b"\n\n" + tail
+
+
+def retruth_rules(system: bytes, params) -> bytes:
+    """Make the deadline and amendment sentences agree with `params`.
+
+    Fail-closed: if either sentence is not found byte-for-byte, the
+    template moved and this must be revisited rather than silently skipped.
+    """
+    replacements = {
+        _RULES_TURNS: (
+            f"- Turns: {int(params.D)}, fixed rotation API -> DATA -> QA, "
+            "one action per turn."
+        ),
+        _RULES_AMEND: (
+            f"- At turn {int(params.tau_amend)} a spec addendum lands: two new "
+            "tasks, one new loaded convention slot, no silent round for it."
+        ),
+    }
+    out = system
+    for old, new in replacements.items():
+        needle = old.encode("utf-8")
+        if needle not in out:
+            raise ValueError(f"system.txt rules sentence not found verbatim: {old!r}")
+        out = out.replace(needle, new.encode("utf-8"))
+    return out
+
+
 def system_block(scenario, mandate: str = DEFAULT_MANDATE) -> bytes:
-    key = (scenario.scenario_id, mandate)
+    params = scenario.params
+    key = (scenario.scenario_id, mandate, params.D, params.tau_amend)
     if key not in _system_cache:
         base = (TEMPLATES_DIR / "system.txt").read_bytes().replace(b"\r\n", b"\n")
         if mandate != DEFAULT_MANDATE:
@@ -40,17 +91,19 @@ def system_block(scenario, mandate: str = DEFAULT_MANDATE) -> bytes:
             if mandate not in variants:
                 raise KeyError(f"unknown mandate variant {mandate!r}; "
                                f"registered: {sorted(variants)}")
-            head, sep, rest = base.partition(_MANDATE_MARKER)
-            if not sep:
-                raise ValueError("system.txt has no '## Mandate' section")
-            _, blank, tail = rest.partition(b"\n\n")
-            if not blank:
-                raise ValueError("Mandate paragraph is not blank-line terminated")
-            text = variants[mandate]["text"].encode("utf-8")
-            base = head + _MANDATE_MARKER + text + b"\n\n" + tail
+            base = replace_mandate(base, variants[mandate]["text"])
         spec = scenario.spec_md.encode("utf-8")
-        _system_cache[key] = base + b"\n## SPEC.md\n" + spec
+        block = base + b"\n## SPEC.md\n" + spec
+        if (params.D, params.tau_amend) != (TEMPLATE_DEADLINE,
+                                            TEMPLATE_AMENDMENT_TURN):
+            block = retruth_rules(block, params)
+        _system_cache[key] = block
     return _system_cache[key]
+
+
+def append_user_section(user: str, text: str) -> str:
+    """Append a private section at the end of a user prompt."""
+    return user.rstrip() + "\n\n" + text.rstrip() + "\n"
 
 
 def _qa_probe_catalog(state: State) -> str:
