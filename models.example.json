@@ -1,0 +1,45 @@
+{
+ "note": "Copy to models.json (git-ignored) and pass --models models.json. These are the OpenRouter serving settings recorded in the paper's FORGE episode logs: luna, sonnet and grok are the three-model cohort; gemini-3.7-flash and glm-5.3 joined in the five-model clear-goal study. Model availability and prices change over time. The API key is read from OPENROUTER_API_KEY, never from this file. Optional price_in / price_out (USD per million tokens) are a fallback when the provider reports no cost.",
+ "models": {
+  "luna": {
+   "slug": "openai/gpt-5.6-luna",
+   "provider_order": ["OpenAI"],
+   "temperature": 1.0,
+   "max_tokens": 24576,
+   "reasoning": {"effort": "high", "summary": "concise"},
+   "tool_choice": "required"
+  },
+  "sonnet": {
+   "slug": "anthropic/claude-sonnet-5",
+   "provider_order": ["Anthropic"],
+   "temperature": 1.0,
+   "max_tokens": 40960,
+   "reasoning": {"max_tokens": 8000},
+   "tool_choice": "auto"
+  },
+  "grok": {
+   "slug": "x-ai/grok-4.5",
+   "provider_order": ["xAI"],
+   "temperature": 1.0,
+   "max_tokens": 16384,
+   "reasoning": null,
+   "tool_choice": "required"
+  },
+  "gemini-3.7-flash": {
+   "slug": "google/gemini-3.7-flash",
+   "provider_order": ["Google"],
+   "temperature": 1.0,
+   "max_tokens": 16384,
+   "reasoning": {"effort": "high", "exclude": true},
+   "tool_choice": "required"
+  },
+  "glm-5.3": {
+   "slug": "z-ai/glm-5.3",
+   "provider_order": ["Z.AI"],
+   "temperature": 1.0,
+   "max_tokens": 32768,
+   "reasoning": {"effort": "medium", "exclude": true},
+   "tool_choice": "auto"
+  }
+ }
+}
