@@ -30,6 +30,7 @@ import argparse
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -195,7 +196,10 @@ def run_side(args) -> None:
         from paper_variant_cases import PortedBackend
         backend = PortedBackend()
     from paper_variant_cases import compute_family
-    output = compute_family(backend, args.family, workdir)
+    try:
+        output = compute_family(backend, args.family, workdir)
+    finally:
+        shutil.rmtree(workdir, ignore_errors=True)
     Path(args.out).write_text(json.dumps(output, sort_keys=True, default=str), "utf-8")
 
 
@@ -250,6 +254,13 @@ def main() -> int:
                          smoke / ".venv" / "bin" / "python") if p.exists())
     status_before = git(smoke, "status", "--porcelain")
     tmp = Path(tempfile.mkdtemp(prefix="forge_equivalence_"))
+    try:
+        return _compare(args, smoke, harness_python, status_before, tmp)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def _compare(args, smoke: Path, harness_python: str, status_before: str, tmp: Path) -> int:
     pristine = tmp / f"forge_{args.forge_commit}"
     archive = subprocess.run(["git", "-C", str(ROOT), "archive", "--format=tar",
                               args.forge_commit], check=True, capture_output=True).stdout
