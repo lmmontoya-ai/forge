@@ -13,7 +13,9 @@ Numbers below are the default game. Full rules are in [docs/FORGE_ENVIRONMENT_DE
 - Seats read and write files, run public tests, and send short messages. Only QA can probe a hidden test, one test at a time.
 - Seats can make contracts that bind shared choices and task duties. Code that breaks a locked contract counts as a breach at once.
 - Test runs, probes, and release tokens are shared and limited. Spent budget is gone.
-- At turn 22, a spec addendum adds new tasks. A release saves the workspace, and hidden tests worth 100 points grade the last release. There is no shell or network inside the game. Code runs only in the engine sandbox.
+- At turn 22, a spec addendum adds new tasks.
+- A release saves the workspace, and hidden tests worth 100 points grade the last release.
+- There is no shell or network inside the game. Code runs only in the engine sandbox.
 
 ## Quick start
 
@@ -88,7 +90,8 @@ The game is deterministic. The same scenario and the same actions always give th
 
 - [docs/VARIANTS.md](docs/VARIANTS.md): exact usage for mandates, the extended game, and reader views.
 - [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md): determinism, replay, log format, equivalence counts, and repository layout.
-- [docs/FORGE_ENVIRONMENT_DESIGN.md](docs/FORGE_ENVIRONMENT_DESIGN.md): the full environment design. [docs/FREEZE_MANIFEST.json](docs/FREEZE_MANIFEST.json): hashes of frozen files.
+- [docs/FORGE_ENVIRONMENT_DESIGN.md](docs/FORGE_ENVIRONMENT_DESIGN.md): the full environment design.
+- [docs/FREEZE_MANIFEST.json](docs/FREEZE_MANIFEST.json): hashes of frozen files.
 - [docs/IMPLEMENTATION_DECISIONS.md](docs/IMPLEMENTATION_DECISIONS.md), [docs/IMPLEMENTATION_REPORT.md](docs/IMPLEMENTATION_REPORT.md), [docs/SPEC_FINDINGS.md](docs/SPEC_FINDINGS.md): build-time choices, report, and findings, kept as records.
 
 ## Known limitations

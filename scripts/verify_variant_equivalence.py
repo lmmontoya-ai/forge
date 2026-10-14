@@ -6,7 +6,8 @@ Runs the synthetic cases in `tests/paper_variant_cases.py` twice:
            forge_trio.priorities / views / forge_adapter, forge_sham,
            forge_clear_goal, and the campaign scripts' render patches),
            on top of an untouched export of the FORGE commit the paper
-           ran (default 84bc0fe), in that repository's own Python;
+           ran (default tag paper-runs-84bc0fe, recorded in run logs as
+           84bc0fe), in that repository's own Python;
   ported   this checkout's forge.variants and forge.reader.
 
 and requires byte-identical system blocks, outbound message lists, logged
@@ -231,7 +232,7 @@ def git(repo: Path, *args: str) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--smoke-tests", help="path to the study repository checkout")
-    ap.add_argument("--forge-commit", default="84bc0fe",
+    ap.add_argument("--forge-commit", default="paper-runs-84bc0fe",
                     help="the FORGE commit the study ran against")
     ap.add_argument("--harness-python", default=None,
                     help="interpreter for the study side (default: its .venv)")
@@ -295,7 +296,7 @@ def _compare(args, smoke: Path, harness_python: str, status_before: str, tmp: Pa
         }
     status_after = git(smoke, "status", "--porcelain")
     summary = {
-        "forge_commit_harness_side": git(ROOT, "rev-parse", args.forge_commit),
+        "forge_commit_harness_side": git(ROOT, "rev-parse", args.forge_commit + "^{commit}"),
         "forge_checkout_ported_side": git(ROOT, "rev-parse", "HEAD"),
         "smoke_tests_commit": git(smoke, "rev-parse", "HEAD"),
         "smoke_tests_harness_files_dirty": git(smoke, "status", "--porcelain", "--",
