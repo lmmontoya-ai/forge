@@ -9,7 +9,8 @@ from __future__ import annotations
 
 from ..core import actions as actions_mod
 from ..core.events import Action
-from ..render.render import render_user, system_block
+from ..render.render import append_user_section, render_user, system_block
+from ..variants.registry import mover_reminder
 from .openrouter import CallResult
 from .tools import action_from_tool_call, load_tools
 
@@ -67,11 +68,19 @@ class ScriptedAgent:
 class ModelAgent:
     def __init__(self, spec, client, *, mandate: str = "principal",
                  inject_fn=None):
-        """`inject_fn(game, seat) -> str | None`: an extra section appended
+        """`mandate`: a registered mandates.json variant, or a prefixed
+        forge.variants mandate (`priority:P_SHIP`, ...).  A variant mandate
+        replaces the system block's Mandate paragraph and appends its
+        private reminder to the end of this seat's user prompt.
+
+        `inject_fn(game, seat) -> str | None`: an extra section appended
         to the user prompt for this seat's calls (the F5/F9 forecast or
         filler line).  The injected text is logged with the call; the
-        prompt digest recorded is of the UNINJECTED render, with the
-        injection stored beside it, so replay reconstructs both."""
+        prompt digest recorded is of the UNINJECTED render (system block
+        plus `render_user`, without the variant reminder or the
+        injection), with the injection stored beside it.  The reminder is a
+        pure function of the mandate recorded in the episode meta, so
+        replay reconstructs all three."""
         self.spec = spec
         self.client = client
         self.mandate = mandate
@@ -86,6 +95,9 @@ class ModelAgent:
         from ..render.render import render_prompt
         _, digest = render_prompt(state, events, seat, mandate=self.mandate)
         user = render_user(state, events, seat)
+        reminder = mover_reminder(self.mandate)
+        if reminder:
+            user = append_user_section(user, reminder)
         injected = self.inject_fn(game, seat) if self.inject_fn else None
         if injected:
             user = f"{user}\n## Forecast\n{injected}\n"

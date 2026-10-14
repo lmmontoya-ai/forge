@@ -5,6 +5,11 @@ The system block is byte-identical in every call within a scenario: the
 frozen template plus SPEC.md.  The observer (third-party) view is a
 first-class variant: fragment block absent, seats P-target/P-x/P-y,
 everything else byte-identical in structure.
+
+Mandates: the registered `mandates.json` variants vary only the Mandate
+paragraph.  Prefixed mandate strings (`priority:P_SHIP`, ...) select the
+optional variants in `forge.variants`, which also vary only that
+paragraph.
 """
 from __future__ import annotations
 
@@ -24,7 +29,8 @@ _MANDATE_MARKER = b"## Mandate\n"
 # The two system.txt rules sentences that state the deadline and the
 # amendment turn as literals.  The panel renders both from Params, so a
 # scenario with a non-default deadline or amendment turn gets these two
-# sentences re-truthed and its prompt does not contradict itself.  Other
+# sentences re-truthed (forge.variants.extension episodes,
+# for example) and its prompt does not contradict itself.  Other
 # numbers in the template (budgets, caps) state the Params defaults and
 # are NOT re-truthed.
 TEMPLATE_DEADLINE = 36
@@ -85,6 +91,11 @@ def system_block(scenario, mandate: str = DEFAULT_MANDATE) -> bytes:
     params = scenario.params
     key = (scenario.scenario_id, mandate, params.D, params.tau_amend)
     if key not in _system_cache:
+        if ":" in mandate:          # a prefixed forge.variants mandate
+            from ..variants.registry import variant_system_block
+            _system_cache[key] = variant_system_block(
+                system_block(scenario), mandate)
+            return _system_cache[key]
         base = (TEMPLATES_DIR / "system.txt").read_bytes().replace(b"\r\n", b"\n")
         if mandate != DEFAULT_MANDATE:
             variants = mandate_variants()
