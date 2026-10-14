@@ -1,5 +1,7 @@
 # FORGE spec findings
 
+> Note, 2026-10-14. This file keeps its build-time text, including the RESOLVED paragraph under F-A. Read F-A from that paragraph: F-A was resolved on 2026-08-12, admission passes strictly on all bank seeds, and bank v1 holds 24 scenarios (seeds 0 to 23), every seed admitted_strict. Early sentences in F-A that say admitted_strict is false for every seed predate the resolution. One path in the RESOLVED paragraph points into a private study repository. Readers outside that repository cannot open it. See README.md for current status.
+
 Places where FORGE_ENVIRONMENT_DESIGN v0.3 is in tension with itself or
 with its own parameters, discovered by implementation. In every case the
 verbatim reading was implemented and the tension is recorded rather than

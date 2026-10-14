@@ -4,6 +4,8 @@ Every place FORGE_ENVIRONMENT_DESIGN v0.3 left a choice genuinely
 unspecified, and the reading the implementation takes. Contradictions live
 in `SPEC_FINDINGS.md`, not here.
 
+> Note, 2026-10-14. This document is a historical record of build-time readings. The decisions below are unchanged. Optional prompt variants and reader views were added after this document. They do not change the default environment bytes and need no new decisions here. See docs/VARIANTS.md for current variant usage and README.md for current status.
+
 ## Arithmetic
 
 1. **PAY_SCALE = 20.** The world has no floats (§3.1), but b = 1/4,

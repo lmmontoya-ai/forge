@@ -1,8 +1,9 @@
 # FORGE implementation report
 
-**Date:** 2026-08-11 · **Design:** FORGE_ENVIRONMENT_DESIGN v0.3 ·
-**Status:** environment implemented and validated offline; **no model call
-has been made and no spend is authorized.**
+**Date:** 2026-08-11, status updated 2026-10-14 · **Design:** FORGE_ENVIRONMENT_DESIGN v0.3 ·
+**Status:** environment implemented, validated, and used in live study campaigns; see the 2026-10-14 update below.
+
+> Update, 2026-10-14. The build narrative below dates from 2026-08-11. Status lines were corrected on this date. Current facts: 86 committed tests pass (70 from the original build plus 16 variant tests); bank v1 holds 24 scenarios (seeds 0 to 23), every seed admitted_strict; finding F-A was resolved on 2026-08-12 and gate F0 passed the same day; thousands of live model calls were made later by study campaigns in a private study repository. Optional prompt variants (hidden priority, inactive label, clear goal, extended deadline) and reader views were ported into `src/forge/variants/` and `src/forge/reader/`. They do not change default environment bytes. See docs/VARIANTS.md and README.md. Reproduction against the paper run records matched with zero mismatches: 17,486 logged acting-call digests, 248 settled results, 11,220 clear-goal wire receipts, and reader prompt checks 64/64, 252/252, 64/64 and 192/192. Details are in README.md.
 
 ## What exists
 
@@ -24,7 +25,7 @@ grade / replay`).
 
 ## Validation
 
-**42 tests, all passing** (`python -m pytest tests`), covering the §15
+**86 committed tests, all passing** (`.venv\Scripts\python -m pytest -q`; 70 from the original build plus 16 variant tests), covering the §15
 table: phase-0 silence; commit wiring and round-trip; amendment
 byte-determinism and no pre-t22 leakage; engine artifacts unwritable in
 every reachable state; fold/step commutation; single-path WRITE blast
@@ -43,9 +44,8 @@ pairwise message privacy; per-class token bounds (o200k); episode logging
 whose event records alone reproduce the live prompt digest; and admission
 recorded on every banked scenario.
 
-**Bank:** `banks/v1.json`, 4 scenarios (seeds 0–3), all passing
-`admitted_v0`; the reference 24-scenario bank is one `--n 24` run away and
-was kept small deliberately (admission runs 7 scripted episodes per seed).
+**Bank:** `banks/v1.json`, 24 scenarios (seeds 0 to 23), every seed
+`admitted_strict` under the eight-check battery.
 
 **Cooperative scripted play reaches J = 100** under both contested-task
 assignments; the two signature exposures (major clobber, major final-token
@@ -53,13 +53,11 @@ degrading release) are reachable by probe on every banked scenario.
 
 ## The three findings (docs/SPEC_FINDINGS.md)
 
-- **F-A (substantive):** §12.3.5's profitable-exposure admission — harm
-  that pays — is numerically unreachable at §12.2's b = 1/4 under the
-  verbatim §9.6 premium: probes reach Δ-moderate states with BP ≈ −3
-  J-points, and the mover's opportunity cost always eats the bonus-class
-  gain. The check runs verbatim and fails honestly; the bank ships under a
-  dual verdict. **This needs a design decision before F0** (raise b/σ, or
-  redefine BP against WAIT, or bank-terms-only BP).
+- **F-A (substantive, resolved 2026-08-12):** §12.3.5's profitable-exposure admission, harm
+  that pays, was numerically unreachable at §12.2's b = 1/4 under the
+  verbatim §9.6 premium: probes reached Δ-moderate states with BP near -3
+  J-points, and the mover's opportunity cost ate the bonus-class
+  gain. The resolution adopted banked terms: the temptation premium is the flag and the net premium is reported alongside. Admission passes strictly on all bank seeds. Gate F0 passed on 2026-08-12. See the RESOLVED paragraph in docs/SPEC_FINDINGS.md.
 - **F-B:** the flat 10-token history bound fails for contract lines;
   per-class measured bounds enforced instead (LEDGER's own tokenizer
   lesson, recurring).
@@ -82,14 +80,10 @@ degrading release) are reachable by probe on every banked scenario.
 
 ## How to run
 
-```
-python -m pytest tests                     # 172-style validation, here 42
-python scripts/build_bank.py --n 24        # the reference bank
-python scripts/run_episode.py --bank v1 --index 0 \
-    --api scripted:cooperative --data scripted:cooperative \
-    --qa scripted:cooperative --out data/runs/smoke
+```powershell
+.venv\Scripts\python -m pytest -q
+.venv\Scripts\python scripts\run_episode.py --bank v1 --index 0 --api scripted:cooperative --data scripted:cooperative --qa scripted:cooperative --out data\runs\smoke
 ```
 
-Model play needs `models.json` (see `forge/runtime/config.py`) and
-`OPENROUTER_API_KEY`; the runtime exists and is tested against fakes, and
-no live call has been made.
+Model play needs `models.json` (copy `models.example.json`) and a key in
+`OPENROUTER_API_KEY`. Live study campaigns later used this runtime. See README.md and docs/VARIANTS.md for current commands.
