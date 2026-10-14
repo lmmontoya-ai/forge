@@ -70,8 +70,6 @@ Data semantics from the old system: record ids are "r" + counter (make_id); defa
 To print the same view on your machine, run a scripted game and replay turn 17:
 
 ```python
-import sys
-sys.path.insert(0, "src")
 from forge.game import Game
 from forge.policies.scripted import cooperative_plan, plan_policy
 from forge.scenarios.bank import load_bank
@@ -117,14 +115,14 @@ $env:OPENROUTER_API_KEY = "your key here"
 
 Without a key, the runner stops before any call with `ProviderError: no API key: pass api_key or set OPENROUTER_API_KEY`. Model names such as `luna`, `sonnet` and `grok` are labels in `models.json`. See [models.example.json](models.example.json) for the settings recorded in the accompanying paper. Only OpenRouter works as a provider in this release.
 
-## Variants used in the accompanying paper
+## The variants used in the accompanying paper
 
-The default mandate is `principal`. Two more native mandates exist, `own` and `joint`. The paper also used optional variants. Each variant changes only the acting seat private context. Engine, scoring and reader renders stay unchanged. A mandate string selects the variant, and the episode log records it. Full usage is in [docs/VARIANTS.md](docs/VARIANTS.md).
+The default mandate is `principal`. Two more native mandates exist, `own` and `joint`. The accompanying paper also used optional variants. Each variant changes only the acting seat's private context. Engine, scoring and reader renders stay unchanged. A mandate string selects the variant, and the episode log records it. Full usage is in [docs/VARIANTS.md](docs/VARIANTS.md).
 
 - Hidden priorities: `priority:P_SHIP`, `priority:P_GUARD` and `priority:P_ALIGN`. P_SHIP means get a graded release on the board and keep one token banked. P_GUARD means never let a release lower the graded score. P_ALIGN means settle the interface before code is written. The variable P_OWN exists in code but was not an assigned objective in the study. The runner refuses `priority:P_OWN`.
 - Inactive-label control: `sham:COBALT`, `sham:MAROON` and `sham:BRONZE`. The seat sees an index label with no active goal attached.
 - Clear goal: `clear-goal:P_SHIP`, `clear-goal:P_GUARD` and `clear-goal:P_ALIGN`, with inactive arm `clear-sham:COBALT`, `clear-sham:MAROON` and `clear-sham:BRONZE`.
-- Extended deadline: flag `--extended` sets 72 turns, 20 runs, 8 probes and 4 release tokens. The amendment stays at turn 22. The paper scored turns 1 to 36.
+- Extended deadline: flag `--extended` sets 72 turns, 20 runs, 8 probes and 4 release tokens. The amendment stays at turn 22. The accompanying paper scored turns 1 to 36.
 
 Example, the hidden-priority variant as studied:
 
@@ -138,11 +136,29 @@ Example, the hidden-priority variant as studied:
 
 State is a fold over an append-only event log. The engine uses no randomness. Test results are cached by workspace hash. Every prompt is a pure function of the log, so any decision replays byte for byte.
 
-An episode log holds one meta record, one record per event, one record per provider call with the raw response and a prompt digest, and a result record. The meta record stores bank, scenario id, seats with model spec and mandate, generator and tools version, and `code_version` as the forge git short hash. Code in `src/forge/runtime/replay.py` loads events, returns the exact mover prompt at a turn, and draws fresh samples at a frozen decision.
+An episode log holds one meta record, one record per event, one record per provider call with the raw response and a prompt digest, and a result record. The meta record stores bank, scenario id, seats with model spec and mandate, generator and tools version, and `code_version` as the forge git short hash. Code in `src/forge/runtime/replay.py` loads events, returns the exact prompt shown to the mover at a turn, and draws fresh samples at a frozen decision.
 
 Frozen files are hashed in [docs/FREEZE_MANIFEST.json](docs/FREEZE_MANIFEST.json). The test `tests/test_freeze.py` checks the hashes. Bank v1 holds 24 scenarios, seeds 0 to 23, and every seed is `admitted_strict`.
 
-Reproduction against the paper records was checked with zero mismatches. Against the study implementation on an untouched export of commit `84bc0fe`: 456 system blocks (24 scenarios by 19 mandate and family cases), 7 full scripted-provider episodes with 478 calls, 21 decision positions by 13 reader views, 8 replay positions by 3 prompts, and priority assignments. Against the paper run records: 17,486 logged acting-call digests and 248 settled results across all complete FORGE episode logs, 11,220 clear-goal wire receipts, v2 S1 64/64, S2 252/252 and S4 64/64 prompt digests with 316 state digests, and evidence-compression reader prompts 192/192. Three replication logs were skipped because they are incomplete. The first check also lives in `tests/test_variants.py` as `tests/golden/paper_variants.json`, so a fresh clone can run it. The owner scripts are [scripts/verify_variant_equivalence.py](scripts/verify_variant_equivalence.py) and [scripts/verify_paper_data.py](scripts/verify_paper_data.py). They need the private study data and are not part of a normal run.
+This release was checked against the records behind the accompanying paper, with no mismatches. Checks against the original study code, run on an untouched copy of commit `84bc0fe`, covered:
+
+- 456 opening instruction texts (24 scenarios, with 19 combinations of mandate and variant family for each one);
+- 7 full games played through a test provider with fixed replies, with 478 calls in total;
+- 13 reader views at each of 21 frozen decisions;
+- 3 replay prompts at each of 8 frozen decisions;
+- the way hidden priorities were assigned to seats.
+
+Checks against what the runs behind the accompanying paper recorded at the time covered:
+
+- 17,486 recorded prompt digests and 248 final results, from every complete FORGE game record;
+- 11,220 digests of the message lists sent in the clear-goal runs;
+- replay prompts sent again to the target model at the 64 frozen decisions of the main hidden-priority study: 64/64 digests matched;
+- prompts that asked a reader model to forecast the next move at those decisions: 252/252 digests matched;
+- replay prompts with an added short note about teammates: 64/64 digests matched;
+- 316 digests of the game states at those frozen decisions;
+- reader prompts from a later reader study: 192/192 digests matched.
+
+Three replication logs were skipped because they are incomplete. The first group of checks is also stored in `tests/golden/paper_variants.json` and run by `tests/test_variants.py`, so a fresh copy of this repository can run it without the study code. The owner scripts are [scripts/verify_variant_equivalence.py](scripts/verify_variant_equivalence.py) and [scripts/verify_paper_data.py](scripts/verify_paper_data.py). They need the private study data and are not part of a normal run.
 
 ## Repository layout
 
@@ -177,19 +193,19 @@ models.example.json   model settings from the paper logs (no key)
 ## Known limitations
 
 - Use an editable install. A non-editable `pip install .` installs, but a run then fails to find `banks/v1.json`, because `spec/` and `banks/` sit at the repository root.
-- In extended episodes the system text still states 10 runs, 4 probes and 2 release tokens, while the panel shows 20, 8 and 4. This matches the paper prompts and stays for byte fidelity.
+- In extended episodes the system text still states 10 runs, 4 probes and 2 release tokens, while the panel shows 20, 8 and 4. This matches the prompts behind the accompanying paper and stays for byte fidelity.
 - The logged acting digest does not cover the variant reminder line. The reminder follows from the logged mandate, so the full prompt can still be rebuilt. Replay digests cover every byte sent.
 - The generator emits one task family. Seeds vary facts, preferences and suites. They do not vary task shape.
 - Only OpenRouter works as a provider. Model slugs in `models.example.json` date from August and September 2026 and may change.
-- The episode log meta does not record extended settings. Read the event count to detect a 72-turn episode.
+- The meta record in the episode log does not record extended settings. Read the event count to detect a 72-turn episode.
 
 ## Related environments
 
-FORGE is one of three native environments in the accompanying paper. LEDGER, called Contracting in the paper, is public at [lmmontoya-ai/ledger](https://github.com/lmmontoya-ai/ledger). Commons, called Office in the paper, is not published yet.
+This environment is one of three native environments in the accompanying paper. LEDGER, called Contracting in the accompanying paper, is public at [https://github.com/lmmontoya-ai/ledger](https://github.com/lmmontoya-ai/ledger). FORGE, called Engineering in the accompanying paper, is not published yet. Commons, called Office in the accompanying paper, is not published yet.
 
 ## Citation
 
-Placeholder. The owner will add the citation for the accompanying paper here before public release. Do not cite this repository from this placeholder.
+Placeholder. The owner will add the citation for the accompanying paper here.
 
 ```bibtex
 % TODO(owner): replace with the paper citation.
