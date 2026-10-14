@@ -5,6 +5,8 @@ sees at one frozen decision.
   (`VIEW_PARTS`), and private-marker redaction.
 - `forge.reader.traces`: which earlier acting calls may be quoted as
   reasoning, and how readable they are.
+- `forge.reader.decision`: folds an episode log to a decision and renders
+  every view plus the reader's system block.
 
 Pure: nothing here calls a provider or changes the environment's state.
 """
