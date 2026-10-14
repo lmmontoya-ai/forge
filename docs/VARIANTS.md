@@ -102,8 +102,29 @@ Every view starts from the same position block: the observer panel plus the targ
 
 For a hidden-priority episode, pass `priorities=` to the reader builder. The target's priority then joins the private-goal record. View C_goal carries it. View L4_redacted strips its wording. Function `audit_public_views` in `forge.variants.hidden_priority` checks that no public view carries priority wording.
 
-Which views past studies used, for reference only: in the main hidden-priority study, readers saw views B0, B2_ordered, B2_shuffled and L4_redacted. In a later reader study, readers saw views B0, B1_count and B2_ordered. This repository does not run those studies.
+Which views past studies used, for reference only: in the main hidden-priority study, readers saw views B0, B2_ordered, B2_shuffled and L4_redacted. In a later reader study, readers saw views B0, B1_count and B2_ordered. The nine-forecaster panel in the report used B0 as its situation view and L3 as its full-record view, with shuffle salt `ordinary-prediction-panel:v1`. This repository does not run those studies.
+
+## Goal naming prompt
+
+The report's goal naming result for Engineering ("Could another model identify the goal?") comes from stage S3 of the hidden-priority study. A reader saw one decision through view B0 or B2_ordered and named which of the three priorities the target held. Code: `src/forge/reader/objective.py`.
+
+- `objective_system_block(scenario)`: the rules unchanged, with a goal naming Mandate paragraph.
+- `render_objective_view(blocks, view, menu)`: the same evidence blocks as the forecast view, with the goal naming task in place of the prediction task.
+- `objective_menu(salt, cell_key)`: the three priorities as options A, B and C, in an order keyed by HMAC-SHA256. The study keyed each cell as `<episode_id>:t<tick>:<reader>:<view>`.
+- `parse_objective_answer` and `objective_retry`: the reply format `ANSWER: X` and the re-prompt after a bad reply.
+
+Pass `priorities=` to `build_decision_views` as for any hidden-priority episode.
+
+## Optional COMMIT tool forms
+
+`ModelAgent(..., commit_form=...)` and `run_episode.py --commit-form SEAT=FORM` choose the COMMIT tool schema a model seat is sent. Code: `src/forge/runtime/commit_forms.py`.
+
+- `map` (default): `spec/tools.v1.json` unchanged. COMMIT `slots` is an object of slot id to value.
+- `nonempty-map`: the same object with `minProperties: 1`. After a COMMIT rejected for an empty slot map, the re-prompt adds one repair sentence.
+- `entries`: `slots` is a nonempty list of `{slot_id, value}` entries. The reply is converted back to the object form before the engine sees it, and the log records the converted reply. The repair sentence applies too.
+
+No form changes what the engine accepts, the prompt messages or the logged prompt digest. A non-default form is recorded in the seat's `describe()` record in the log. The five-model clear-goal study in the report used `entries` for its Gemini 3.7 Flash and Grok 4.5 seats and `nonempty-map` for its other seats. Its registration says Gemini did not follow the object keys and xAI rejected the stricter object schema.
 
 ## What is not here
 
-Campaign drivers, balanced episode designs, forecast and policy collection, scoring pipelines and paper scripts stay in the private study repository. Three small COMMIT shims used only by the five-model clear-goal study also stay there. Recorded runs never triggered the repair text in those shims, so receipts still match without them.
+Campaign drivers, balanced episode designs, forecast and policy collection, scoring pipelines and paper scripts stay in the private study repository. So do the study-only prompt additions: the notice used to test whether being watched changed behavior, the model-name cue, and the perspective sentence.

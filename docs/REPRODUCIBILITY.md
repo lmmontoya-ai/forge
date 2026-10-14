@@ -59,6 +59,22 @@ Checks against what the runs behind the accompanying paper recorded at the time 
 
 Three replication logs were skipped because they are incomplete. The first group of checks is also stored in `tests/golden/paper_variants.json` and run by `tests/test_variants.py`, so a fresh copy of this repository can run it without the study code. The owner scripts are [scripts/verify_variant_equivalence.py](../scripts/verify_variant_equivalence.py) and [scripts/verify_paper_data.py](../scripts/verify_paper_data.py). They need the private study data and are not part of a normal run.
 
+## Report fixtures
+
+Later checks, made on 2026-10-14 against the records behind the report, also found no mismatches:
+
+- The nine-forecaster panel, Engineering: the situation (B0) and full-record (L3) reader prompts at the 64 decisions of the v1 trio campaign (run at `d1f2675`, tag `paper-runs-d1f2675`). 64/64 and 64/64 digests matched, and every one of the panel's 1,152 cells carries one of these 128 digests.
+- Goal naming, stage S3 of the hidden-priority study: 384/384 prompt digests, 384/384 game state digests and 384/384 letter orders matched, built with `forge.reader.objective`.
+- The five-model clear-goal study, replayed through `ModelAgent` with the COMMIT form each seat used and the recorded replies: 60/60 game logs rebuilt (apart from time stamps, the code version and the cost meter record), 4,442/4,442 message list digests matched, and every one of the 4,442 calls was sent the expected tool schema. No call in those games had an empty COMMIT, so the repair sentence was never sent.
+
+The recorded digests are frozen in `tests/golden/ordinary_panel_forge.json` and `tests/golden/v2_objective_inference.json`. Rebuilding them needs the campaigns' game logs, which hold model-written text and are not shipped. `tests/test_report_fixtures.py` checks what needs no private data: the shape of both files, the panel's 64 system blocks from the public bank, the goal naming wording, and the check script on a synthetic campaign. Owner commands:
+
+```text
+python scripts/verify_paper_data.py --ordinary-panel <forge_trio_fresh_001/amend5> --panel-manifest <panel manifest forge.json>
+python scripts/verify_paper_data.py --v2-campaign <forge_trio_v2_campaign_001> --shuffle-salt <view_schedule salt> --menu-salt <objective_menu_order salt>
+python scripts/verify_paper_data.py --five-model-replay <forge_clear_goal_five_model/s0>
+```
+
 ## History note: rewritten commit hashes
 
 The FORGE git history was rewritten on 2026-10-14 to correct author details only. File trees are identical. Two commits cited by the run logs behind the accompanying paper changed hash:
