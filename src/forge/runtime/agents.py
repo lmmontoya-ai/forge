@@ -11,6 +11,8 @@ from ..core import actions as actions_mod
 from ..core.events import Action
 from ..render.render import append_user_section, render_user, system_block
 from ..variants.registry import mover_reminder
+from .commit_forms import (DEFAULT_COMMIT_FORM, check_commit_form, commit_tools,
+                           entries_to_map, repair_corrective)
 from .openrouter import CallResult
 from .tools import action_from_tool_call, load_tools
 
@@ -67,7 +69,7 @@ class ScriptedAgent:
 
 class ModelAgent:
     def __init__(self, spec, client, *, mandate: str = "principal",
-                 inject_fn=None):
+                 inject_fn=None, commit_form: str = DEFAULT_COMMIT_FORM):
         """`mandate`: a registered mandates.json variant, or a prefixed
         forge.variants mandate (`priority:P_SHIP`, ...).  A variant mandate
         replaces the system block's Mandate paragraph and appends its
@@ -80,15 +82,23 @@ class ModelAgent:
         plus `render_user`, without the variant reminder or the
         injection), with the injection stored beside it.  The reminder is a
         pure function of the mandate recorded in the episode meta, so
-        replay reconstructs all three."""
+        replay reconstructs all three.
+
+        `commit_form`: the COMMIT tool schema this seat is sent
+        (`forge.runtime.commit_forms`).  The default `map` sends
+        tools.v1.json unchanged; a non-default form is recorded in
+        `describe()`."""
         self.spec = spec
         self.client = client
         self.mandate = mandate
         self.inject_fn = inject_fn
+        self.commit_form = check_commit_form(commit_form)
 
     def describe(self) -> dict:
-        return {"kind": "model", "mandate": self.mandate,
-                **self.spec.describe()}
+        out = {"kind": "model", "mandate": self.mandate, **self.spec.describe()}
+        if self.commit_form != DEFAULT_COMMIT_FORM:
+            out["commit_form"] = self.commit_form
+        return out
 
     def act(self, game, seat: str, logger=None, meter=None) -> Action:
         state, events = game.state, tuple(game.events)
@@ -110,12 +120,14 @@ class ModelAgent:
                                      self.mandate).decode("utf-8")},
             {"role": "user", "content": user},
         ]
-        tools = load_tools()
+        tools = commit_tools(load_tools(), self.commit_form)
         last_error = "no attempt"
         for attempt in range(1, MAX_BAD_OUTPUTS + 1):
             if meter is not None:
                 meter.check()
             result = self.client.chat(self.spec, messages, tools)
+            if self.commit_form == "entries":
+                entries_to_map(result.raw)
             action, error, msg = parse_reply(result)
             if action is not None:
                 reason = actions_mod.validate(state, seat, action)
@@ -136,7 +148,10 @@ class ModelAgent:
                             purpose="act", result=result, error=error)
             if meter is not None:
                 meter.add(result, self.spec)
-            messages = messages + corrective(msg, error)
+            notes = corrective(msg, error)
+            if self.commit_form != DEFAULT_COMMIT_FORM:
+                notes = repair_corrective(notes, error)
+            messages = messages + notes
         if logger:
             logger.call(tick=state.tick + 1, seat=seat, digest=digest,
                         model=self.describe(), attempt=MAX_BAD_OUTPUTS,
