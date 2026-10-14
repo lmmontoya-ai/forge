@@ -3,6 +3,11 @@ __pycache__/
 .venv/
 .pytest_cache/
 .hypothesis/
-src/forge.egg-info/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
 data/runs/
 models.json
+.env
+.env.*
