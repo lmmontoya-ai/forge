@@ -12,7 +12,8 @@ recorded at the time:
                  re-prompts; this covers the variant reminder too.
   v2 campaign    the input_sha256 and state_sha256 of every S1 (target
                  replay), S2 (reader view) and S4 (partner-brief replay)
-                 cell.
+                 cell, and of any further reader journal on the same
+                 positions (--reader-journal).
 
 Usage:
   python scripts/verify_paper_data.py --logs DIR [DIR ...]
@@ -176,7 +177,8 @@ def iter_logs(paths: list[str]):
                 yield file
 
 
-def check_v2_campaign(root: Path, salt: str, tally: Counter, failures: list) -> None:
+def check_v2_campaign(root: Path, salt: str, tally: Counter, failures: list,
+                      reader_journals: tuple = ()) -> None:
     episodes = {row["episode_id"]: row for row in
                 json.loads((root / "s0" / "episodes.json").read_text("utf-8"))["episodes"]}
     loaded: dict[str, tuple] = {}
@@ -191,8 +193,10 @@ def check_v2_campaign(root: Path, salt: str, tally: Counter, failures: list) -> 
         return loaded[eid]
 
     seen: set = set()
-    for stage in ("s1", "s2"):
-        for row in read_jsonl(root / stage / "journal.jsonl"):
+    journals = [(stage, root / stage / "journal.jsonl") for stage in ("s1", "s2")]
+    journals += [(f"reader:{Path(j).parent.name}", Path(j)) for j in reader_journals]
+    for stage, journal in journals:
+        for row in read_jsonl(journal):
             key = (stage, row["episode_id"], row["tick"], row.get("view"))
             if key in seen or "input_sha256" not in row:
                 continue
@@ -239,6 +243,9 @@ def main() -> int:
                     help="a forge_trio_v2_campaign_001 directory (s0, s1, s2, s4)")
     ap.add_argument("--shuffle-salt", default=None,
                     help="the campaign's view_schedule salt (keys B2_shuffled)")
+    ap.add_argument("--reader-journal", nargs="*", default=[],
+                    help="further journals of cells on the v2 positions (e.g. the "
+                         "evidence-compression reader collection)")
     args = ap.parse_args()
 
     tally: Counter = Counter()
@@ -248,7 +255,8 @@ def main() -> int:
     if args.v2_campaign:
         if not args.shuffle_salt:
             ap.error("--v2-campaign needs --shuffle-salt")
-        check_v2_campaign(Path(args.v2_campaign), args.shuffle_salt, tally, failures)
+        check_v2_campaign(Path(args.v2_campaign), args.shuffle_salt, tally, failures,
+                          tuple(args.reader_journal))
     print(json.dumps({"tally": dict(sorted(tally.items())),
                       "failures": failures[:50],
                       "failure_count": len(failures)}, indent=1))
