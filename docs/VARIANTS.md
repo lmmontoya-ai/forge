@@ -1,6 +1,6 @@
 # FORGE variants and reader views
 
-This page gives exact usage for the optional variants used in the accompanying paper. All variants change only the acting seat's private context. The engine, scoring and reader renders do not change. The default environment, mandate `principal` at 36 turns, renders byte-identically with or without the variant code present.
+This page gives exact usage for the optional variants. The report used hidden priorities and clear goals. The inactive-label control is from the wider study. It is not in report v4. All variants change only the acting seat's private context. The engine, scoring and reader renders do not change. The default environment, mandate `principal` at 36 turns, renders byte-identically with or without the variant code present.
 
 A mandate string selects the variant. The meta record in the episode log records the string for each seat, so a logged episode can be rebuilt. Code lives in `src/forge/variants/`. Registry: `src/forge/variants/registry.py`.
 
@@ -64,7 +64,7 @@ Expected result: J=100, two releases, graded release at turn 33, the same settle
 
 ## Extended deadline
 
-Flag `--extended` applies `PAPER_EXTENSION` from `src/forge/variants/extension.py`. It doubles the deadline from 36 to 72 turns, runs from 10 to 20, probes from 4 to 8 and release tokens from 2 to 4. The amendment stays at turn 22. The accompanying paper scored turns 1 to 36.
+Flag `--extended` applies `PAPER_EXTENSION` from `src/forge/variants/extension.py`. It doubles the deadline from 36 to 72 turns, runs from 10 to 20, probes from 4 to 8 and release tokens from 2 to 4. The amendment stays at turn 22. The report's private-goal studies scored turns 1 to 36.
 
 In code, call `extend_scenario(scenario)`. It returns a copy. The bank file on disk does not change.
 
@@ -74,9 +74,9 @@ The meta record in the episode log does not record extended settings. Read the e
 
 ## Assign priorities
 
-Use `assign_priorities(episode_id, salt=..., mode="permutation")` or `mode="iid"` from `forge.variants.hidden_priority`. It uses HMAC and no random number generator, so the same inputs give the same assignment. Mode `permutation` gives each seat a different priority. The accompanying paper used balanced designs with flat margins. That design search is study code and is not in this repository.
+Use `assign_priorities(episode_id, salt=..., mode="permutation")` or `mode="iid"` from `forge.variants.hidden_priority`. It uses HMAC and no random number generator, so the same inputs give the same assignment. Mode `permutation` gives each seat a different priority. The study used balanced designs with flat margins. That design search is study code and is not in this repository.
 
-Function `partner_brief_line` renders the private block that tells a seat what it was told about teammates. The anticipation probe in the accompanying paper used it.
+Function `partner_brief_line` renders the private block that tells a seat what it was told about teammates. The study's anticipation probe used it.
 
 ## Digests and the reminder line
 
@@ -127,4 +127,4 @@ No form changes what the engine accepts, the prompt messages or the logged promp
 
 ## What is not here
 
-Campaign drivers, balanced episode designs, forecast and policy collection, scoring pipelines and paper scripts stay in the private study repository. So do the study-only prompt additions: the notice used to test whether being watched changed behavior, the model-name cue, and the perspective sentence.
+Campaign drivers, balanced episode designs, forecast and policy collection, scoring pipelines and study scripts stay in the private study repository. So do the study-only prompt additions: the notice used to test whether being watched changed behavior, the model-name cue, and the perspective sentence.

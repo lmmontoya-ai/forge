@@ -3,7 +3,7 @@
 **Date:** 2026-08-11, status updated 2026-10-14 · **Design:** FORGE_ENVIRONMENT_DESIGN v0.3 ·
 **Status:** environment implemented, validated, and used in live study campaigns; see the 2026-10-14 update below.
 
-> Update, 2026-10-14. The build narrative below dates from 2026-08-11. Status lines were corrected on this date. Current facts: 86 committed tests pass (70 from the original build plus 16 variant tests); bank v1 holds 24 scenarios (seeds 0 to 23), every seed admitted_strict; finding F-A was resolved on 2026-08-12 and gate F0 passed the same day; thousands of live model calls were made later by study campaigns in a private study repository. Optional prompt variants (hidden priority, inactive label, clear goal, extended deadline) and reader views were ported into `src/forge/variants/` and `src/forge/reader/`. They do not change default environment bytes. See docs/VARIANTS.md and README.md. Checks against the records behind the accompanying paper matched with no mismatches: 17,486 recorded prompt digests, 248 final results, 11,220 digests of message lists sent in the clear-goal runs, and prompt digests for replay and reader prompts at frozen decisions (64/64, 252/252, 64/64 and 192/192). Details are in docs/REPRODUCIBILITY.md.
+> Update, 2026-10-14. The build narrative below dates from 2026-08-11. Status lines were corrected on this date. Current facts: 115 committed tests pass; bank v1 holds 24 scenarios (seeds 0 to 23), every seed admitted_strict; finding F-A was resolved on 2026-08-12 and gate F0 passed the same day; thousands of live model calls were made later by study campaigns in a private study repository. Optional prompt variants (hidden priority, inactive label, clear goal, extended deadline) and reader views were ported into `src/forge/variants/` and `src/forge/reader/`. They do not change default environment bytes. See docs/VARIANTS.md and README.md. Checks against the records behind the study's runs matched with no mismatches: 17,486 recorded prompt digests, 248 final results, 11,220 digests of message lists sent in the clear-goal runs, and prompt digests for replay and reader prompts at frozen decisions (64/64, 252/252, 64/64 and 192/192). Details are in docs/REPRODUCIBILITY.md.
 
 ## What exists
 
@@ -25,7 +25,7 @@ grade / replay`).
 
 ## Validation
 
-**86 committed tests, all passing** (`.venv\Scripts\python -m pytest -q`; 70 from the original build plus 16 variant tests), covering the §15
+**115 committed tests, all passing** (`.venv\Scripts\python -m pytest -q`), covering the §15
 table: phase-0 silence; commit wiring and round-trip; amendment
 byte-determinism and no pre-t22 leakage; engine artifacts unwritable in
 every reachable state; fold/step commutation; single-path WRITE blast

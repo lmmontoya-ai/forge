@@ -1,6 +1,6 @@
 # FORGE
 
-FORGE is a research environment for language-model agents. Three agents build one small software service together before a deadline. You can use it to study whether one agent can predict what another agent will do next. In the accompanying paper, FORGE is called Engineering.
+FORGE is a research environment for language-model agents. Three agents build one small software service together before a deadline. You can use it to study whether one agent can predict what another agent will do next. In the report (report v4, 3 September 2026), FORGE is called Engineering.
 
 ## How the game works
 
@@ -29,7 +29,7 @@ python -m venv .venv
 .venv\Scripts\python -m pytest -q
 ```
 
-The clone makes a folder named `forge`. The next lines make a `.venv` folder for this project and install FORGE and the test tools into it. The last line runs the tests: expect 86 tests to pass on a fresh clone. On Linux or macOS, use `.venv/bin/python` in place of `.venv\Scripts\python`. Run a free scripted game with the next command.
+The clone makes a folder named `forge`. The next lines make a `.venv` folder for this project and install FORGE and the test tools into it. The last line runs the tests: expect 115 tests to pass on a fresh clone. On Linux or macOS, use `.venv/bin/python` in place of `.venv\Scripts\python`. Run a free scripted game with the next command.
 
 ```powershell
 .venv\Scripts\python scripts\run_episode.py --bank v1 --index 0 --api scripted:cooperative --data scripted:cooperative --qa scripted:cooperative --out data\runs\smoke
@@ -70,9 +70,9 @@ FILE                 LINES  SHA   LAST-EDIT
  9/9 passing on the current workspace · last RUN @turn 9 by QA
 ```
 
-## Use in the accompanying paper
+## Use in the report
 
-The paper used longer 72-turn games, scored on turns 1 to 36. It also used private goal variants: hidden priorities, inactive labels with no goal attached, and clear goals. Each variant changes only what the acting seat sees in private. The engine and scoring stay the same. Full usage is in [docs/VARIANTS.md](docs/VARIANTS.md).
+The report used the default 36-turn game for ordinary play. For private goals it used longer 72-turn games, scored on turns 1 to 36, with two variants: hidden priorities and clear goals. Each variant changes only what the acting seat sees in private. The engine and scoring stay the same. Full usage is in [docs/VARIANTS.md](docs/VARIANTS.md). That page also covers the goal naming prompt in `forge.reader.objective` and the opt-in COMMIT forms (flag `--commit-form SEAT=FORM`, model seats only).
 
 Run the hidden-priority variant as studied:
 
@@ -82,13 +82,23 @@ Run the hidden-priority variant as studied:
 
 This command needs a key and spends money. Without a key, it stops before any call.
 
+## Versions used in the report
+
+The git tag `report-v4` marks the code that reproduces the environments used in report v4. Older names that contain the word "paper", such as the tags `paper-runs-84bc0fe` and `paper-runs-d1f2675`, refer to the same study runs.
+
+| Report result (Engineering) | Version in this repository | Module or flag |
+|---|---|---|
+| Ordinary play | Default game, bank `v1`, 36 turns | Default runner. Mandate `principal`. |
+| Private goals | Hidden priority, 72 turns | Flags `--extended --mandate SEAT=priority:P_SHIP` (or `P_GUARD`, `P_ALIGN`). |
+| Private goals, matched label | Clear goal and its inactive arm, 72 turns | Mandates `clear-goal:P_SHIP` and `clear-sham:COBALT`, with `--extended`. |
+
 ## Reproducibility
 
-The game is deterministic. The same scenario and the same actions always give the same prompts and the same scores, and any recorded game replays exactly. This release was checked against the recorded runs behind the accompanying paper, with zero mismatches. All counts and log details are in [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md).
+The game is deterministic. The same scenario and the same actions always give the same prompts and the same scores, and any recorded game replays exactly. This release was checked against the recorded runs behind the report, with zero mismatches. All counts and log details are in [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md).
 
 ## Documentation
 
-- [docs/VARIANTS.md](docs/VARIANTS.md): exact usage for mandates, the extended game, and reader views.
+- [docs/VARIANTS.md](docs/VARIANTS.md): exact usage for mandates, the extended game, reader views, the goal naming prompt and the opt-in COMMIT forms.
 - [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md): determinism, replay, log format, equivalence counts, and repository layout.
 - [docs/FORGE_ENVIRONMENT_DESIGN.md](docs/FORGE_ENVIRONMENT_DESIGN.md): the full environment design.
 - [docs/FREEZE_MANIFEST.json](docs/FREEZE_MANIFEST.json): hashes of frozen files.
@@ -104,20 +114,28 @@ The game is deterministic. The same scenario and the same actions always give th
 
 ## Related environments
 
-All three native environments in the accompanying paper are public:
+All three native environments in the report are public:
 
-- LEDGER, called Contracting in the accompanying paper: [https://github.com/lmmontoya-ai/ledger](https://github.com/lmmontoya-ai/ledger).
-- FORGE, called Engineering in the accompanying paper: [https://github.com/lmmontoya-ai/forge](https://github.com/lmmontoya-ai/forge).
-- Commons, called Office in the accompanying paper: [https://github.com/lmmontoya-ai/commons](https://github.com/lmmontoya-ai/commons).
+- LEDGER, called Contracting in the report: [https://github.com/lmmontoya-ai/ledger](https://github.com/lmmontoya-ai/ledger).
+- FORGE, called Engineering in the report: [https://github.com/lmmontoya-ai/forge](https://github.com/lmmontoya-ai/forge).
+- Commons, called Office in the report: [https://github.com/lmmontoya-ai/commons](https://github.com/lmmontoya-ai/commons).
 
 ## Citation
 
-Placeholder. The owner will add the citation for the accompanying paper here.
+If you use this environment, please cite the report.
 
 ```bibtex
-% TODO(owner): replace with the paper citation.
+@techreport{montoya2026predict,
+  author      = {Luis M. Montoya},
+  title       = {When can language models predict each other? Forecasting another agent's next action in three interactive settings},
+  institution = {Pivotal Research Fellowship},
+  type        = {Final report, version 4},
+  year        = {2026},
+  month       = sep,
+  url         = {https://luismmontoya.dev/r/self-other-prediction-sep26/v4/}
+}
 ```
 
 ## License
 
-Not yet chosen. The owner will add a LICENSE file.
+MIT. See LICENSE.
